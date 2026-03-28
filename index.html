@@ -546,7 +546,22 @@
     fragments: [],
     manga_sfx: [],
     niibura: [],
-    cecile_sounds: [],
+    cecile_sounds: [
+      // 初期の「最高に良かった偽フランス語」の固定フレーズを復活
+      {text:"ブランシュヴォ",type:"cecile_sounds",intensity:3},{text:"ブォルデナール",type:"cecile_sounds",intensity:3},
+      {text:"モンプゥルヴァ",type:"cecile_sounds",intensity:3},{text:"トゥネルボワ",type:"cecile_sounds",intensity:3},
+      {text:"ブルデモントゥ",type:"cecile_sounds",intensity:3},{text:"トゥルシュヴァ",type:"cecile_sounds",intensity:3},
+      {text:"ブランヴォネール",type:"cecile_sounds",intensity:3},{text:"シュルヴァネ",type:"cecile_sounds",intensity:3},
+      {text:"ヴァルネシュ",type:"cecile_sounds",intensity:3},{text:"モントゥルボァ",type:"cecile_sounds",intensity:3},
+      {text:"トゥレモンシュ",type:"cecile_sounds",intensity:3},{text:"ブレモンドゥァ",type:"cecile_sounds",intensity:3},
+      {text:"フェンルボァ",type:"cecile_sounds",intensity:3},{text:"セトゥルバーヌ",type:"cecile_sounds",intensity:3},
+      {text:"フェルモンシュ",type:"cecile_sounds",intensity:3},{text:"フェドランヴァ",type:"cecile_sounds",intensity:3},
+      {text:"フェランシュボ",type:"cecile_sounds",intensity:3},{text:"セトゥモンシュ",type:"cecile_sounds",intensity:3},
+      {text:"ブォルヴァシュ",type:"cecile_sounds",intensity:3},{text:"フェヴランドゥボ",type:"cecile_sounds",intensity:3},
+      {text:"セュルブォネ",type:"cecile_sounds",intensity:3},{text:"ヴォルデュシュ",type:"cecile_sounds",intensity:3},
+      {text:"フェボランシュ",type:"cecile_sounds",intensity:3},{text:"セドゥルヴォァ",type:"cecile_sounds",intensity:3},
+      {text:"ブォヴランシュ",type:"cecile_sounds",intensity:3}
+    ],
     templates: [
       {template:"___っと___する",slots:["sound_a","sound_b"]},
       {template:"___の___感",slots:["sound_a","sound_b"]},
@@ -591,15 +606,6 @@
     "{A}のせいで{B}が止まらない", "{A}、そして{B}へ", "ただひたすらに{A}"
   ];
 
-  // セシール系（空耳フランス語）専用のパーツ
-  const cecileParts = [
-    "イロッ", "フォンセ", "ドゥ", "ボテ", "アン", "サン", "ブル", "デ", "モン", "トゥ", 
-    "ル", "ノ", "シ", "パ", "ミ", "キャ", "ラ", "ヴ", "ジュ", "シュ", "ファ", "フェ", 
-    "マ", "ク", "ア", "オ", "エ", "ティ", "ディ", "プ", "ペ", "コ", "ン", "ム",
-    "ソ", "ザ", "ゼ", "プゥ", "モア", "トワ", "ヌ", "ヴゥ", "パル", "ビアン", "シュル", "セ", "サ",
-    "パッセ", "ジュテ", "コン", "プレ", "マン", "タン", "ドン", "ボン", "ジュール", "ソワ"
-  ];
-
   function expandPhrases() {
     for(let i=0; i<200; i++) {
       PHRASES.single_sounds.push({ text: genZowaWord(), type: "single", intensity: Math.random()>0.5?3:2 });
@@ -631,13 +637,12 @@
       PHRASES.niibura.push({ text: t, type: "niibura", intensity: 2 });
     }
     
-    // ⭐️ セシール系の大増量（約20文字の謎のボソボソ空耳）
+    // ⭐️ セシール系（旧：偽フランス語）のロジック復活＆増量
+    const fH = ["ブラン","ブォル","モン","トゥ","ブル","シュル","ヴァル","フェン","セトゥ","フェ","ジュ","ル"];
+    const fM = ["シュ","デ","プゥル","ネル","デモン","ル","ヴォ","ネ","ドラン","ラン","ルデュ","ヴァン"];
+    const fT = ["ヴォ","ナール","ヴァ","ボワ","トゥ","ネール","ボァ","シュ","ドゥァ","バーヌ","ワーズ","グレ","デュル"];
     for(let i=0; i<150; i++) {
-      let t = "";
-      // 18文字以上になるまでパーツを組み合わせる
-      while(t.length < 18) {
-        t += cecileParts[Math.floor(Math.random() * cecileParts.length)];
-      }
+      let t = fH[Math.floor(Math.random()*fH.length)] + fM[Math.floor(Math.random()*fM.length)] + fT[Math.floor(Math.random()*fT.length)];
       PHRASES.cecile_sounds.push({ text: t, type: "cecile_sounds", intensity: 3 });
     }
     
@@ -659,7 +664,7 @@
   // === 音声読み上げ（強制リセット安全装置付き） ===
   let currentAudio = new Audio();
   const ZUNDAMON_STYLES = [3, 1, 7, 5, 22, 38, 75, 76];
-  let globalWatchdog = null; // 安全装置タイマー
+  let globalWatchdog = null; 
   
   const synth = window.speechSynthesis;
   let jpVoice = null;
@@ -672,7 +677,6 @@
   }
   loadVoices();
 
-  // UIを強制的に初期状態に戻す関数
   function forceResetUI(btnElement, spanEl) {
     if (btnElement) {
       btnElement.classList.remove('loading', 'speaking');
@@ -691,7 +695,6 @@
     if (!text) return;
     stopSpeak();
 
-    // ⭐️ スマホの自動再生ブロック回避のため、ボタンを押した瞬間に無音を発火させる
     if (synth) {
       let dummy = new SpeechSynthesisUtterance('');
       dummy.volume = 0;
@@ -705,7 +708,6 @@
       if (spanEl) spanEl.textContent = '生成中...';
     }
 
-    // ⭐️ 絶対に「生成中」で固まらせないための安全装置（15秒で強制終了）
     clearTimeout(globalWatchdog);
     globalWatchdog = setTimeout(() => {
       forceResetUI(btnElement, spanEl);
@@ -730,7 +732,6 @@
       utter.rate = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3);
       utter.volume = 1.0;
 
-      // フォールバックすらスマホに無視された場合のための1.5秒監視タイマー
       let fbCheck = setTimeout(() => {
         if (btnElement && !btnElement.classList.contains('speaking')) {
            clearTimeout(globalWatchdog);
@@ -818,7 +819,6 @@
     });
   }
 
-  // ボタンのイベントリスナー
   $('btn-speak').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
@@ -931,6 +931,7 @@
     $('phrase-text').textContent = phrase.text;
     $('phrase-hint').textContent = '声に出して読んでみよう';
 
+    // ⭐️ 偽フランス語の内部コード名のまま、表示ラベルは「セシール系」に変更
     const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',cecile_sounds:'セシール系',mix:'ミックス'};
     $('phrase-type').textContent = labels[phrase.type] || '';
 
