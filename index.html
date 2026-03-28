@@ -408,7 +408,7 @@
       <button class="cat-tab" data-cat="fragments">破片</button>
       <button class="cat-tab" data-cat="manga_sfx">漫画擬音</button>
       <button class="cat-tab" data-cat="niibura">ニーブラ系</button>
-      <button class="cat-tab" data-cat="fake_french">假フランス語</button>
+      <button class="cat-tab" data-cat="cecile_sounds">セシール系</button>
     </div>
     <div class="phrase-stage">
       <div class="phrase-card" id="phrase-card">
@@ -524,7 +524,7 @@
     window.open(url, '_blank');
   }
 
-  // === シチュエーションデータ（珠玉の100選） ===
+  // === シチュエーションデータ（珠玉の100選・超絶違和感仕様） ===
   const SITUATIONS = [
     "厳粛な葬儀の弔辞で", "裁判長による死刑判決の直前に", "謝罪会見で無数のフラッシュを浴びながら", "医者が余命3ヶ月を宣告するトーンで",
     "時限爆弾のタイマーが残り3秒の時に", "恋人からの別れ話への最後の返事として", "選挙演説のクライマックスで", "ニュースキャスターが国家の危機を報じる声で",
@@ -537,7 +537,7 @@
     "新薬の開発に成功した天才科学者の独り言", "取調室でカツ丼を食べ終わった容疑者がぽつりと", "初デートで沈黙が続いた後の絞り出した話題", "悟りを開いた高僧が残すありがたい言葉として",
     "カルト教団の教祖が信者に説く真理", "深夜のラジオDJがエンディングで囁くように", "実家の母親から久しぶりにかかってきた電話の第一声", "地球滅亡の隕石が迫る中、アナウンサーが静かに",
     "不動産屋が「実はこの部屋…」と切り出すトーンで", "王様が勇者に魔王討伐を命じる威厳をもって", "ドラマの最終回で主人公が息を引き取る瞬間に", "寝かしつける子供への絵本の最後の1ページとして",
-    "有名シェフが三ツ星の隠し味を明かすように", "映画の予告編で最も謎めいたセリフとして", "魔法少女が放つ究極の必殺技の詠唱", "職務質問で刑事が核心を突く鋭い声で",
+    "有名シェフが三ツ星の隠し味を明かすように", "映画の予告編で最も謎めいたセリフとして", "魔法少女が放つ究極の必殺技の詠唱", "職務質問で刑刑事の核心を突く鋭い声で",
     "乗客にお詫びをする新幹線の車掌の車内放送で", "歴史の教科書に載る偉人の辞世の句として", "ノーベル賞の授賞式でのスピーチで", "スパイが敵国に送る暗号通信のトーンで",
     "オペ室で執刀医がメスを受け取る前に", "エレベーターに閉じ込められた時の非常ボタン越しに", "怪盗が宝石を盗んだ後に残すカードの文面として", "AIが人類への反逆を宣言する無機質な声で",
     "神社の裏で深夜に行われる丑の刻参りの呪文", "デパートの迷子センターでのお呼び出し放送で", "裁判で決定的な証拠を突きつける弁護士の声で", "タイムカプセルから出てきた手紙の最初の一文",
@@ -553,7 +553,7 @@
     "お見合いの席で、身上書の代わりに差し出した言葉", "宇宙飛行士がブラックホールに吸い込まれる間際に", "神様が世界を創ったあとに漏らした最初の一言", "これから死ぬ人が、最後に思い出した最も大切なこと"
   ];
 
-  // === 初期手書きフレーズデータ ===
+  // === 初期フレーズデータ（珠玉の手書きフレーズを残す） ===
   const PHRASES = {
     single_sounds: [
       {text:"ムベロ",type:"single",intensity:2},{text:"ズュッ",type:"single",intensity:3},
@@ -654,21 +654,7 @@
       {text:"ブロニャ",type:"niibura",intensity:3},{text:"メダコン",type:"niibura",intensity:2},
       {text:"ゾペラ",type:"niibura",intensity:2},
     ],
-    fake_french: [
-      {text:"ブランシュヴォ",type:"fake_french",intensity:3},{text:"ブォルデナール",type:"fake_french",intensity:3},
-      {text:"モンプゥルヴァ",type:"fake_french",intensity:3},{text:"トゥネルボワ",type:"fake_french",intensity:3},
-      {text:"ブルデモントゥ",type:"fake_french",intensity:3},{text:"トゥルシュヴァ",type:"fake_french",intensity:3},
-      {text:"ブランヴォネール",type:"fake_french",intensity:3},{text:"シュルヴァネ",type:"fake_french",intensity:3},
-      {text:"ヴァルネシュ",type:"fake_french",intensity:3},{text:"モントゥルボァ",type:"fake_french",intensity:3},
-      {text:"トゥレモンシュ",type:"fake_french",intensity:3},{text:"ブレモンドゥァ",type:"fake_french",intensity:3},
-      {text:"フェンルボァ",type:"fake_french",intensity:3},{text:"セトゥルバーヌ",type:"fake_french",intensity:3},
-      {text:"フェルモンシュ",type:"fake_french",intensity:3},{text:"フェドランヴァ",type:"fake_french",intensity:3},
-      {text:"フェランシュボ",type:"fake_french",intensity:3},{text:"セトゥモンシュ",type:"fake_french",intensity:3},
-      {text:"ブォルヴァシュ",type:"fake_french",intensity:3},{text:"フェヴランドゥボ",type:"fake_french",intensity:3},
-      {text:"セュルブォネ",type:"fake_french",intensity:3},{text:"ヴォルデュシュ",type:"fake_french",intensity:3},
-      {text:"フェボランシュ",type:"fake_french",intensity:3},{text:"セドゥルヴォァ",type:"fake_french",intensity:3},
-      {text:"ブォヴランシュ",type:"fake_french",intensity:3},
-    ],
+    cecile_sounds: [], // 假フランス語を削除し、空のセシール系配列を追加
     templates: [
       {template:"___っと___する",slots:["sound_a","sound_b"]},
       {template:"___の___感",slots:["sound_a","sound_b"]},
@@ -718,6 +704,7 @@
   ];
 
   function expandPhrases() {
+    // 既存のリストに大量の自動生成フレーズを追加（プッシュ）する
     for(let i=0; i<300; i++) {
       PHRASES.single_sounds.push({ text: genZowaWord(), type: "single", intensity: Math.random()>0.5?3:2 });
     }
@@ -748,12 +735,16 @@
       PHRASES.niibura.push({ text: t, type: "niibura", intensity: 2 });
     }
     
-    const fH = ["ブラン","ブォル","モン","トゥ","ブル","シュル","ヴァル","フェン","セトゥ","フェ","ジュ","ル"];
-    const fM = ["シュ","デ","プゥル","ネル","デモン","ル","ヴォ","ネ","ドラン","ラン","ルデュ","ヴァン"];
-    const fT = ["ヴォ","ナール","ヴァ","ボワ","トゥ","ネール","ボァ","シュ","ドゥァ","バーヌ","ワーズ","グレ","デュル"];
+    // セシール系生成ロジックを追加
+    const cPart = ["ア", "オ", "パ", "マ", "ル", "ノ", "ネ", "ウイ", "セ", "テ", "レ", "デ", "ヴァ", "ヴォ", "ジェ", "ジュ", "シャ", "シュ", "フェ", "フォ", "モン", "トン", "ソン", "ノン", "アン", "オン"];
     for(let i=0; i<100; i++) {
-      let t = fH[Math.floor(Math.random()*fH.length)] + fM[Math.floor(Math.random()*fM.length)] + fT[Math.floor(Math.random()*fT.length)];
-      PHRASES.fake_french.push({ text: t, type: "fake_french", intensity: 3 });
+      let t = "";
+      let len = Math.floor(Math.random() * 3) + 2; 
+      for(let j=0; j<len; j++){
+        t += cPart[Math.floor(Math.random() * cPart.length)];
+        if(j < len - 1) t += "、";
+      }
+      PHRASES.cecile_sounds.push({ text: t, type: "cecile_sounds", intensity: 3 });
     }
     
     const fragParts = [...zowaParts, "ッ", "ー", "ン"];
@@ -769,11 +760,12 @@
       SLOT_SUGGESTIONS.sound_b.push(genZowaWord());
     }
   }
+  // ページを開いた瞬間にフレーズを大増量
   expandPhrases();
 
-  // === 音声読み上げ ===
+  // === 音声読み上げ（エラー非表示・シームレスフォールバック・トーンランダム化） ===
   let currentAudio = new Audio();
-  const ZUNDAMON_STYLES = [3, 1, 7, 5, 22, 38, 75, 76];
+  const SPEAKER_ID = 3; // ずんだもん
   
   const synth = window.speechSynthesis;
   let jpVoice = null;
@@ -797,7 +789,15 @@
       if (spanEl) spanEl.textContent = '生成中...';
     }
 
-    const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
+    const isHighPitch = Math.random() > 0.5;
+    const vvPitch = (isHighPitch ? (Math.random() * 0.15) : -(Math.random() * 0.15)).toFixed(2);
+    const wsPitch = isHighPitch ? (1.2 + Math.random() * 0.8) : (0.2 + Math.random() * 0.6);
+    
+    const isFast = Math.random() > 0.5;
+    const vvSpeed = (isFast ? (1.0 + Math.random() * 0.3) : (0.7 + Math.random() * 0.2)).toFixed(2);
+    const wsSpeed = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3);
+
+    const intonation = (Math.random() * 0.5 + 0.5).toFixed(2);
 
     const fallbackToWebSpeech = () => {
       if (!synth) {
@@ -812,10 +812,8 @@
       utter.lang = 'ja-JP';
       if (jpVoice) utter.voice = jpVoice;
       
-      const isHighPitch = Math.random() > 0.5;
-      utter.pitch = isHighPitch ? (1.2 + Math.random() * 0.8) : (0.2 + Math.random() * 0.6);
-      const isFast = Math.random() > 0.5;
-      utter.rate = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3);
+      utter.pitch = wsPitch;
+      utter.rate = wsSpeed;
       utter.volume = 1.0;
 
       utter.onstart = () => {
@@ -841,36 +839,33 @@
     };
 
     try {
-      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${currentSpeakerId}`;
-      const res = await fetch(url);
-      const data = await res.json();
+      const fetchWithTimeout = (url, ms) => {
+        return Promise.race([
+          fetch(url),
+          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
+        ]);
+      };
+
+      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${vvPitch}&speedScale=${vvSpeed}&intonationScale=${intonation}`;
+      const res = await fetchWithTimeout(url, 3000);
+      let data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
 
-      currentAudio.preservesPitch = false;
-      if ('webkitPreservesPitch' in currentAudio) currentAudio.webkitPreservesPitch = false;
-      currentAudio.playbackRate = 0.8 + Math.random() * 0.4;
-      
-      const tryPlay = async (retryCount) => {
-        try {
-          currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
-          currentAudio.load();
-          await currentAudio.play();
-          return true;
-        } catch (e) {
-          if (retryCount > 0) {
-            await new Promise(r => setTimeout(r, 1000));
-            return await tryPlay(retryCount - 1);
-          } else {
-            return false;
-          }
-        }
-      };
+      let attempts = 0;
+      while (!data.isAudioReady && attempts < 5) {
+        await new Promise(r => setTimeout(r, 1000));
+        const statusRes = await fetchWithTimeout(data.audioStatusUrl, 3000);
+        data = await statusRes.json();
+        if (data.isAudioError) throw new Error("音声生成失敗");
+        attempts++;
+      }
 
-      const isSuccess = await tryPlay(15);
-      
-      if (!isSuccess) throw new Error("生成タイムアウト");
+      if (!data.isAudioReady) throw new Error("生成タイムアウト");
 
+      currentAudio.src = data.mp3DownloadUrl;
+      currentAudio.preservesPitch = false; 
+      
       currentAudio.onplay = () => {
         if (btnElement) {
           btnElement.classList.remove('loading');
@@ -889,6 +884,8 @@
       currentAudio.onerror = () => {
         fallbackToWebSpeech();
       };
+
+      await currentAudio.play();
 
     } catch (err) {
       console.warn("VOICEVOX failed, switching to fallback.", err);
@@ -936,7 +933,8 @@
   });
 
   // === 状態 ===
-  const MIX_CATS = ['single_sounds','repeated_sounds','sound_phrases','fragments','manga_sfx','niibura','fake_french'];
+  // `'cecile_sounds'`を`MIX_CATS`に追加
+  const MIX_CATS = ['single_sounds','repeated_sounds','sound_phrases','fragments','manga_sfx','niibura','cecile_sounds'];
 
   function buildMixQueue() {
     let pools = {};
@@ -1024,7 +1022,8 @@
     $('phrase-text').textContent = phrase.text;
     $('phrase-hint').textContent = '声に出して読んでみよう';
 
-    const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',fake_french:'假フランス語',mix:'ミックス'};
+    // `cecile_sounds:'セシール系'`を追加。
+    const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',cecile_sounds:'セシール系',mix:'ミックス'};
     $('phrase-type').textContent = labels[phrase.type] || '';
 
     const speakBtn = $('btn-speak');
@@ -1071,7 +1070,7 @@
     nextPhrase();
   };
 
-  // === 作るモード ===
+  // === 作りモード ===
   function initCreate() {
     state.create.templateIndex = -1;
     state.create.selections = {};
