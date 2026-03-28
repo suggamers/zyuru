@@ -422,6 +422,14 @@
   </div>
 
   <script>
+  // === ユーティリティ（※ここを一番上に移動しました） ===
+  const $ = id => document.getElementById(id);
+  function shuffle(arr) {
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+    return a;
+  }
+
   // === フレーズデータ ===
   const PHRASES = {
     single_sounds: [
@@ -639,14 +647,6 @@
     read: { category:'mix', queue:[], score:0, streak:0, maxStreak:0, awaitingReaction:false, current:null },
     create: { templateIndex:-1, current:null, selections:{}, score:0 },
   };
-
-  // === ユーティリティ ===
-  const $ = id => document.getElementById(id);
-  function shuffle(arr) {
-    const a=[...arr];
-    for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
-    return a;
-  }
 
   // === スクリーン遷移 ===
   function showScreen(name) {
