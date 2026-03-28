@@ -326,9 +326,9 @@
         <ellipse cx="160" cy="92" rx="100" ry="4" fill="currentColor" opacity="0.06"/>
       </svg>
     </div>
-    <p class="title-sub">音列の違和感を、楽しむゲーム</p>
+    <p class="title-sub">音列の違和感を楽しむゲーム</p>
     <div class="title-desc">
-      <p>気持ち悪いフレーズを、自信満々に声に出してみよう。</p>
+      <p>気持ち悪いフレーズを自信満々に声に出してみよう。</p>
       <p>首筋から背中にかけての、あの「ぞわっ」を楽しもう。</p>
     </div>
     <div class="mode-buttons">
@@ -486,27 +486,39 @@
     window.open(url, '_blank');
   }
 
-  // === シチュエーションデータ ===
+  // === シチュエーションデータ（珠玉の100選・超絶違和感仕様） ===
   const SITUATIONS = [
-    "自信満々にドヤ顔で",
-    "今にも泣きそうな声で",
-    "耳元で優しく囁くように",
-    "キレ気味で早口に",
-    "遠くを見つめながらポツリと",
-    "獲物を狙うような目で",
-    "すべてを悟ったようなトーンで",
-    "初めて言葉を覚えた赤ちゃんのように",
-    "深夜のテンションで",
-    "会議の真面目なプレゼン中に",
-    "親に怒られている途中で",
-    "プロポーズの瞬間に",
-    "命乞いをしながら"
+    "厳粛な葬儀の弔辞で", "裁判長による死刑判決の直前に", "謝罪会見で無数のフラッシュを浴びながら", "医者が余命3ヶ月を宣告するトーンで",
+    "時限爆弾のタイマーが残り3秒の時に", "恋人からの別れ話への最後の返事として", "選挙演説のクライマックスで", "ニュースキャスターが国家の危機を報じる声で",
+    "産まれたばかりの我が子を抱きしめて", "プロポーズで指輪の箱を開けながら", "人類で初めて地球外生命体と交信した第一声で", "敵の黒幕に銃口を突きつけられながら",
+    "最終面接で「あなたの強みは？」と聞かれて", "長年連れ添った妻への最期の遺言として", "オリンピックの金メダルインタビューで涙ながらに", "ハイジャック犯への説得のメガホン越しに",
+    "トイレの個室に紙がないことに気づいた瞬間に", "株主総会で大赤字の理由を詰められて", "記憶喪失の主人公が全てを思い出した瞬間に", "満員電車の中で響き渡る寝言として",
+    "結婚式の神父が永遠の愛を問いかける声で", "銀行強盗が人質に向けて放つ脅し文句", "国連総会での歴史的なスピーチで", "部下の重大なミスを静かに叱責するトーンで",
+    "呪われたビデオテープから流れる音声として", "宇宙船から地球への最後の通信で", "お化け屋敷で最も恐ろしい仕掛けの音声として", "校長先生の長すぎる朝礼の締めの言葉として",
+    "浮気現場を修羅場に突入した妻が放つ一言", "クイズ番組で一千万を賭けた最終問題の答えとして", "夜道の後ろからピタリとついてくる足音の主が", "絶対に笑ってはいけないお葬式の最中に",
+    "新薬の開発に成功した天才科学者の独り言", "取調室でカツ丼を食べ終わった容疑者がぽつりと", "初デートで沈黙が続いた後の絞り出した話題", "悟りを開いた高僧が残すありがたい言葉として",
+    "カルト教団の教祖が信者に説く真理", "深夜のラジオDJがエンディングで囁くように", "実家の母親から久しぶりにかかってきた電話の第一声", "地球滅亡の隕石が迫る中、アナウンサーが静かに",
+    "不動産屋が「実はこの部屋…」と切り出すトーンで", "王様が勇者に魔王討伐を命じる威厳をもって", "ドラマの最終回で主人公が息を引き取る瞬間に", "寝かしつける子供への絵本の最後の1ページとして",
+    "有名シェフが三ツ星の隠し味を明かすように", "映画の予告編で最も謎めいたセリフとして", "魔法少女が放つ究極の必殺技の詠唱", "職務質問で刑事が核心を突く鋭い声で",
+    "乗客にお詫びをする新幹線の車掌の車内放送で", "歴史の教科書に載る偉人の辞世の句として", "ノーベル賞の授賞式でのスピーチで", "スパイが敵国に送る暗号通信のトーンで",
+    "オペ室で執刀医がメスを受け取る前に", "エレベーターに閉じ込められた時の非常ボタン越しに", "怪盗が宝石を盗んだ後に残すカードの文面として", "AIが人類への反逆を宣言する無機質な声で",
+    "神社の裏で深夜に行われる丑の刻参りの呪文", "デパートの迷子センターでのお呼び出し放送で", "裁判で決定的な証拠を突きつける弁護士の声で", "タイムカプセルから出てきた手紙の最初の一文",
+    "ホテルマンがVIP客を最上階へ案内する声で", "パイロットが不時着を覚悟した際の機内放送で", "長年探していた幻の秘宝を見つけた探検家の呟き", "スーパーのタイムセールの異常な熱気の中で",
+    "甲子園の選手宣誓で高らかに", "ファミレスのレジでクレームを入れるおばさんの声で", "悪魔と契約を交わす時の合言葉として", "警察の交渉人が屋上の飛び降り志願者に向けて",
+    "アカデミー賞主演女優賞の感動的なスピーチで", "ドキュメンタリー番組の重厚なナレーションで", "動物園の飼育員が危険生物の脱走を知らせる声で", "ピアノコンクールの静寂を切り裂く観客の叫び",
+    "廃墟で見つけた古い日記に血文字で書かれた一文", "選挙カーからウグイス嬢が涙声で訴えかけるように", "バイトの初日で店長から教わる一番大切なルール", "スナイパーが狙撃直前に風を読む時の呟き",
+    "満天の星空を見上げながらロマンチックに", "会社の飲み会で泥酔した部長の熱い説教", "映画の吹き替えで主人公が相棒を失った絶叫", "通販番組で司会者が驚愕の価格を発表するトーンで",
+    "オカルト番組で霊媒師が除霊を行う時の声で", "戦国武将が出陣の前に兵たちを鼓舞する怒声", "深夜のドライブスルーのインターホン越しに", "コンサートのアンコールでボーカルが叫ぶ一言",
+    "旅館の女将が曰く付きの部屋を説明するトーンで", "誘拐犯が要求する身代金の受け渡し指示として", "童話「桃太郎」で桃が割れた瞬間の効果音として", "マフィアのボスが裏切り者を処刑する前の囁き",
+    "修学旅行の夜、先生に見つかった時の言い訳", "美術館でモナリザを見た人が漏らす感嘆の声", "隕石衝突のシェルターに入るための最後の暗証番号", "取り憑かれた人がエクソシストに向かって放つ声",
+    "クラスで一番静かな子が卒業式でいきなり叫ぶ一言", "刑事ドラマのエンディングで流れる意味深な台詞", "バスの運転手が居眠りからハッと目を覚ました瞬間", "預言者が世界の終わりを予言する荘厳な声で",
+    "お見合いの席で、身上書の代わりに差し出した言葉", "宇宙飛行士がブラックホールに吸い込まれる間際に", "神様が世界を創ったあとに漏らした最初の一言", "これから死ぬ人が、最後に思い出した最も大切なこと"
   ];
 
-  // === フレーズデータ ===
+  // === フレーズデータ（「サピーン」完全削除 ＆ 「ムベロ」等へ置換） ===
   const PHRASES = {
     single_sounds: [
-      {text:"サピーン",type:"single",intensity:2},{text:"ズュッ",type:"single",intensity:3},
+      {text:"ムベロ",type:"single",intensity:2},{text:"ズュッ",type:"single",intensity:3},
       {text:"ニュヴァ",type:"single",intensity:3},{text:"ピャキ",type:"single",intensity:2},
       {text:"ズッキャ",type:"single",intensity:2},{text:"ゲュム",type:"single",intensity:3},
       {text:"シュヴァッ",type:"single",intensity:2},{text:"ヌォ",type:"single",intensity:3},
@@ -521,7 +533,7 @@
       {text:"ヌェッ",type:"single",intensity:3},
     ],
     repeated_sounds: [
-      {text:"サピーンサピーン",type:"repeat",intensity:3},{text:"ズッキャズッキャ",type:"repeat",intensity:3},
+      {text:"ムベロムベロ",type:"repeat",intensity:3},{text:"ズッキャズッキャ",type:"repeat",intensity:3},
       {text:"ニュヴァニュヴァ",type:"repeat",intensity:3},{text:"ピャキピャキ",type:"repeat",intensity:2},
       {text:"ゲュムゲュム",type:"repeat",intensity:3},{text:"ヌォヌォ",type:"repeat",intensity:3},
       {text:"ジュワキジュワキ",type:"repeat",intensity:2},{text:"ズォッズォッ",type:"repeat",intensity:3},
@@ -531,7 +543,7 @@
       {text:"グャムグャム",type:"repeat",intensity:3},
     ],
     sound_phrases: [
-      {text:"ニュヴァがサピーンした",type:"phrase",intensity:3},
+      {text:"ニュヴァがムベロした",type:"phrase",intensity:3},
       {text:"ズッキャのヌォ感",type:"phrase",intensity:3},
       {text:"ピャキッとゲュムる",type:"phrase",intensity:3},
       {text:"スュクなジュワキ",type:"phrase",intensity:2},
@@ -542,7 +554,7 @@
       {text:"ゲニャくてズォッとする",type:"phrase",intensity:3},
       {text:"ヌォのニュキャ加減",type:"phrase",intensity:2},
       {text:"ズュッはズュッなんだよ",type:"phrase",intensity:3},
-      {text:"サピーン的なピュギャさ",type:"phrase",intensity:3},
+      {text:"ムベロ的なピュギャさ",type:"phrase",intensity:3},
       {text:"ゲュムりながらスュクった",type:"phrase",intensity:3},
       {text:"ヌャッとジョヴィる感じ",type:"phrase",intensity:3},
       {text:"ズィッなのかヌォなのか",type:"phrase",intensity:2},
@@ -628,11 +640,11 @@
     ],
   };
   const SLOT_SUGGESTIONS = {
-    sound_a:["サピーン","ズッキャ","ニュヴァ","ピャキ","ゲュム","ヌォ","ジュワキ","ズォッ","ピュギャ","ゲニャ"],
+    sound_a:["ムベロ","ズッキャ","ニュヴァ","ピャキ","ゲュム","ヌォ","ジュワキ","ズォッ","ピュギャ","ゲニャ"],
     sound_b:["スュク","ジョヴィ","ブュン","ゾュッ","ペュキ","ニュキャ","ズィッ","グャム","シュポヴ","ヴュク"],
   };
 
-  // === 音声読み上げ（VOICEVOX + WebSpeechハイブリッド トーンランダム化） ===
+  // === 音声読み上げ（エラー非表示・シームレスフォールバック・トーンランダム化） ===
   let currentAudio = new Audio();
   const SPEAKER_ID = 3; // ずんだもん
   
@@ -658,22 +670,26 @@
     }
 
     // 🎲 ランダムなトーン設定を生成
-    // pitch (高さ): 高い声と低い声をランダムに振る
     const isHighPitch = Math.random() > 0.5;
     const vvPitch = (isHighPitch ? (Math.random() * 0.15) : -(Math.random() * 0.15)).toFixed(2);
     const wsPitch = isHighPitch ? (1.2 + Math.random() * 0.8) : (0.2 + Math.random() * 0.6); // WebSpeech用
     
-    // speed (速さ): 早口とゆっくりをランダムに振る
     const isFast = Math.random() > 0.5;
     const vvSpeed = (isFast ? (1.0 + Math.random() * 0.3) : (0.7 + Math.random() * 0.2)).toFixed(2);
     const wsSpeed = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3); // WebSpeech用
 
     const intonation = (Math.random() * 0.5 + 0.5).toFixed(2);
 
-    // 🛡️ フォールバック機能（APIがダメだった時に走る処理）
+    // 🛡️ フォールバック機能（アラート一切なしで静かに切り替わる）
     const fallbackToWebSpeech = () => {
-      console.log("VOICEVOXを諦めて、ブラウザ標準音声（ランダムトーン）で再生します");
-      if (!synth) return;
+      if (!synth) {
+        // 万が一WebSpeechすら使えない環境でもエラー表示させず静かにボタンを戻す
+        if (btnElement) {
+          btnElement.classList.remove('loading', 'speaking');
+          btnElement.querySelector('span').textContent = '聴く';
+        }
+        return;
+      }
       const utter = new SpeechSynthesisUtterance(text);
       window._currentUtterance = utter; // ガベージコレクション対策
       utter.lang = 'ja-JP';
@@ -706,7 +722,7 @@
     };
 
     try {
-      // タイムアウト付きのフェッチ関数（5秒待ってダメならエラーにする）
+      // タイムアウト付きのフェッチ関数
       const fetchWithTimeout = (url, ms) => {
         return Promise.race([
           fetch(url),
@@ -714,18 +730,18 @@
         ]);
       };
 
-      // 1. APIに生成をリクエストする
+      // 1. APIに生成をリクエスト
       const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${vvPitch}&speedScale=${vvSpeed}&intonationScale=${intonation}`;
-      const res = await fetchWithTimeout(url, 5000);
+      const res = await fetchWithTimeout(url, 3000); // 3秒で見切りをつける
       let data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
 
-      // 2. サーバー側で音声が完成するまで「正しい作法」で待機（最大10秒）
+      // 2. サーバー側で音声が完成するまで待機（最大5秒まで短縮して待つ）
       let attempts = 0;
-      while (!data.isAudioReady && attempts < 10) {
-        await new Promise(r => setTimeout(r, 1000)); // 1秒待機
-        const statusRes = await fetchWithTimeout(data.audioStatusUrl, 5000);
+      while (!data.isAudioReady && attempts < 5) {
+        await new Promise(r => setTimeout(r, 1000));
+        const statusRes = await fetchWithTimeout(data.audioStatusUrl, 3000);
         data = await statusRes.json();
         if (data.isAudioError) throw new Error("音声生成失敗");
         attempts++;
@@ -753,15 +769,15 @@
       };
       
       currentAudio.onerror = () => {
-        // もしmp3の取得自体に失敗した場合はフォールバック
+        // mp3取得エラー時はエラーダイアログ等出さずに静かにフォールバック
         fallbackToWebSpeech();
       };
 
       await currentAudio.play();
 
     } catch (err) {
-      // APIが混んでいる、タイムアウトした等のエラーが起きたら瞬時にフォールバック
-      console.warn(err);
+      // エラーログだけ裏側に残し、ユーザーには何も知らせずシームレスにフォールバック
+      console.warn("VOICEVOX failed, switching to fallback.", err);
       fallbackToWebSpeech();
     }
   }
