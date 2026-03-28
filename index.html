@@ -99,7 +99,6 @@
     .mode-desc { font-size: var(--text-xs); color: var(--color-text-muted); }
     .title-note { font-size: var(--text-xs); color: var(--color-text-faint); }
     
-    /* 権利表記（VOICEVOX用） */
     .credit {
       text-align: center;
       font-size: 0.65rem;
@@ -162,7 +161,19 @@
     .phrase-card:hover { border-color: var(--color-primary-dim); transform: scale(1.01); }
     .phrase-card:active { transform: scale(0.99); }
     .phrase-card.zowa-flash { border-color: var(--color-primary); box-shadow: 0 0 32px var(--color-zowa-glow); }
+    
     .phrase-hint { font-size: var(--text-xs); color: var(--color-text-faint); letter-spacing: 0.06em; }
+    
+    /* シチュエーション表示用スタイル */
+    .phrase-situation, .preview-situation {
+      font-size: var(--text-sm);
+      color: var(--color-primary);
+      font-weight: bold;
+      letter-spacing: 0.05em;
+      margin-bottom: calc(var(--space-2) * -1);
+      display: none;
+    }
+
     .phrase-text {
       font-family: var(--font-display); font-size: var(--text-phrase);
       font-weight: 700; color: var(--color-text); line-height: 1.4;
@@ -180,10 +191,8 @@
       background: var(--color-surface-offset);
     }
     
-    /* アクションボタン群のラッパー */
     .footer-actions { display: flex; gap: var(--space-2); align-items: center; }
 
-    /* 音声再生・シェアボタンのスタイル */
     .btn-speak, .btn-share {
       display: flex; align-items: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
@@ -193,11 +202,8 @@
       position: relative; z-index: 10;
     }
     .btn-speak:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); }
-    
-    /* ローディング状態のスタイル */
     .btn-speak.loading { opacity: 0.6; pointer-events: none; animation: speakPulse 1.5s ease-in-out infinite; }
     .btn-speak.speaking { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); animation: speakPulse 800ms ease-in-out infinite; }
-    
     .btn-share:hover { color: #d8d5e8; border-color: #d8d5e8; background: rgba(255,255,255,0.1); }
 
     @keyframes speakPulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
@@ -321,9 +327,9 @@
         <ellipse cx="160" cy="92" rx="100" ry="4" fill="currentColor" opacity="0.06"/>
       </svg>
     </div>
-    <p class="title-sub">音列の違和感を楽しむゲーム</p>
+    <p class="title-sub">音列の違和感を、楽しむゲーム</p>
     <div class="title-desc">
-      <p>気持ち悪いフレーズを自信満々に声に出してみよう。</p>
+      <p>気持ち悪いフレーズを、自信満々に声に出してみよう。</p>
       <p>首筋から背中にかけての、あの「ぞわっ」を楽しもう。</p>
     </div>
     <div class="mode-buttons">
@@ -370,6 +376,7 @@
     <div class="phrase-stage">
       <div class="phrase-card" id="phrase-card">
         <div class="phrase-hint" id="phrase-hint">カードをタップしてスタート</div>
+        <div class="phrase-situation" id="phrase-situation"></div>
         <div class="phrase-text" id="phrase-text">タップ</div>
         <div class="phrase-card-footer">
           <div class="phrase-type" id="phrase-type"></div>
@@ -437,6 +444,7 @@
             </button>
           </div>
         </div>
+        <div class="preview-situation" id="preview-situation"></div>
         <div class="preview-text placeholder" id="preview-text">—— 上から選んで完成させよう ——</div>
       </div>
       
@@ -468,14 +476,35 @@
     return a;
   }
 
-  // === Xシェア機能 ===
-  function shareToX(text) {
-    const tweetText = `【魂の叫び】\n「${text}」\n\n#ズュッル #音列の違和感\n`;
+  // === Xシェア機能（シチュエーション追加対応） ===
+  function shareToX(text, situation) {
+    let tweetText = `【魂の叫び】\n`;
+    if (situation) {
+      tweetText += `状況：${situation}\n`;
+    }
+    tweetText += `「${text}」\n\n#ズュッル #音列の違和感\n`;
     const url = 'https://x.com/intent/tweet?text=' + encodeURIComponent(tweetText);
     window.open(url, '_blank');
   }
 
-  // === フレーズデータ ===
+  // === シチュエーションデータ ===
+  const SITUATIONS = [
+    "自信満々にドヤ顔で",
+    "今にも泣きそうな声で",
+    "耳元で優しく囁くように",
+    "キレ気味で早口に",
+    "遠くを見つめながらポツリと",
+    "獲物を狙うような目で",
+    "すべてを悟ったようなトーンで",
+    "初めて言葉を覚えた赤ちゃんのように",
+    "深夜のテンションで",
+    "会議の真面目なプレゼン中に",
+    "親に怒られている途中で",
+    "プロポーズの瞬間に",
+    "命乞いをしながら"
+  ];
+
+  // === フレーズデータ（元に戻しました） ===
   const PHRASES = {
     single_sounds: [
       {text:"サピーン",type:"single",intensity:2},{text:"ズュッ",type:"single",intensity:3},
@@ -604,17 +633,12 @@
     sound_b:["スュク","ジョヴィ","ブュン","ゾュッ","ペュキ","ニュキャ","ズィッ","グャム","シュポヴ","ヴュク"],
   };
 
-  // === 音声読み上げ（VOICEVOX 外部API連携版） ===
+  // === 音声読み上げ（VOICEVOX トーンランダム化） ===
   let currentAudio = null;
-  
-  // ★ ここで声の種類を変更できます ★
-  // 3: ずんだもん（ノーマル） / 8: 春日部つむぎ / 13: 青山龍星 / 14: 冥鳴ひまり
-  const SPEAKER_ID = 3; 
+  const SPEAKER_ID = 3; // ずんだもん
 
   async function speakText(text, btnElement) {
     if (!text) return;
-    
-    // 再生中の音声を止める
     stopSpeak();
 
     if (btnElement) {
@@ -623,17 +647,22 @@
     }
 
     try {
-      // tts.questの無料APIを叩く
-      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}`;
+      // API側のパラメータで声のピッチ（高さ）とスピードをランダム化
+      const pitch = (Math.random() * 0.3 - 0.15).toFixed(2); // -0.15 (低い) 〜 +0.15 (高い)
+      const speed = (Math.random() * 0.4 + 0.8).toFixed(2);  // 0.8 (遅い) 〜 1.2 (速い)
+      const intonation = (Math.random() * 0.5 + 0.5).toFixed(2); // 0.5 (平坦) 〜 1.0 (普通)
+
+      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${pitch}&speedScale=${speed}&intonationScale=${intonation}`;
       const res = await fetch(url);
       const data = await res.json();
       
-      if (!data.success) {
-        throw new Error("APIエラー");
-      }
+      if (!data.success) throw new Error("APIエラー");
 
-      // 生成されたmp3を再生する
       currentAudio = new Audio(data.mp3DownloadUrl);
+      
+      // さらにブラウザの再生機能でも少しだけ再生速度をバグらせる（テープの遅送り・早送りのような効果）
+      currentAudio.preservesPitch = false; 
+      currentAudio.playbackRate = 0.85 + Math.random() * 0.3; // 0.85 〜 1.15倍
       
       currentAudio.onplay = () => {
         if (btnElement) {
@@ -682,7 +711,7 @@
     });
   }
 
-  // ボタンのイベントリスナー設定
+  // ボタンのイベントリスナー（シチュエーション渡し対応）
   $('btn-speak').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
@@ -697,12 +726,14 @@
   $('btn-share-read').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
-    if (text) shareToX(text);
+    const sit = this.dataset.sit;
+    if (text) shareToX(text, sit);
   });
   $('btn-share-create').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
-    if (text) shareToX(text);
+    const sit = this.dataset.sit;
+    if (text) shareToX(text, sit);
   });
 
   // === 状態 ===
@@ -729,8 +760,8 @@
   }
 
   const state = {
-    read: { category:'mix', queue:[], score:0, streak:0, maxStreak:0, awaitingReaction:false, current:null },
-    create: { templateIndex:-1, current:null, selections:{}, score:0 },
+    read: { category:'mix', queue:[], score:0, streak:0, maxStreak:0, awaitingReaction:false, current:null, currentSituation:null },
+    create: { templateIndex:-1, current:null, selections:{}, score:0, currentSituation:null },
   };
 
   function showScreen(name) {
@@ -750,6 +781,7 @@
     $('reaction-area').style.display = 'none';
     $('btn-speak').style.display = 'none';
     $('btn-share-read').style.display = 'none';
+    $('phrase-situation').style.display = 'none';
     $('phrase-text').textContent = 'タップ';
     $('phrase-hint').textContent = 'カードをタップしてスタート';
     $('phrase-type').textContent = '';
@@ -777,6 +809,13 @@
     if (r.queue.length === 0) r.queue = r.category === 'mix' ? buildMixQueue() : shuffle([...PHRASES[r.category]]);
     const phrase = r.queue.pop();
     r.current = phrase;
+    
+    // ランダムなシチュエーションをセット
+    r.currentSituation = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
+    const sitEl = $('phrase-situation');
+    sitEl.textContent = `【状況：${r.currentSituation}】`;
+    sitEl.style.display = 'block';
+
     r.awaitingReaction = false;
 
     const card = $('phrase-card');
@@ -795,7 +834,9 @@
     speakBtn.style.display = 'flex';
     shareBtn.style.display = 'flex';
     speakBtn.dataset.phrase = phrase.text;
+    
     shareBtn.dataset.phrase = phrase.text;
+    shareBtn.dataset.sit = r.currentSituation;
     stopSpeak();
 
     setTimeout(() => {
@@ -848,6 +889,10 @@
     c.templateIndex = (c.templateIndex + 1) % templates.length;
     c.current = templates[c.templateIndex];
     c.selections = {};
+    
+    // ランダムなシチュエーションをセット
+    c.currentSituation = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
+    
     $('template-text').textContent = c.current.template;
     stopSpeak();
     renderSlots();
@@ -901,6 +946,7 @@
     const card = $('preview-card');
     const speakBtn = $('btn-speak-create');
     const shareBtn = $('btn-share-create');
+    const sitEl = $('preview-situation');
     
     if (Object.keys(c.selections).length === 0) {
       el.textContent = '—— 上から選んで完成させよう ——';
@@ -908,19 +954,26 @@
       card.classList.remove('ready');
       speakBtn.style.display = 'none';
       shareBtn.style.display = 'none';
+      sitEl.style.display = 'none';
       $('create-reaction-area').style.display = 'none';
     } else {
       el.textContent = text;
       el.classList.remove('placeholder');
       if (allFilled) { 
         card.classList.add('ready'); 
+        
+        sitEl.textContent = `【状況：${c.currentSituation}】`;
+        sitEl.style.display = 'block';
+        
         $('create-reaction-area').style.display = 'flex';
         speakBtn.style.display = 'flex';
         shareBtn.style.display = 'flex';
         speakBtn.dataset.phrase = text;
         shareBtn.dataset.phrase = text;
+        shareBtn.dataset.sit = c.currentSituation;
       } else { 
         card.classList.remove('ready'); 
+        sitEl.style.display = 'none';
         $('create-reaction-area').style.display = 'none';
         speakBtn.style.display = 'none';
         shareBtn.style.display = 'none';
@@ -954,6 +1007,7 @@
       $('create-reaction-area').style.display = 'none';
       $('btn-speak-create').style.display = 'none';
       $('btn-share-create').style.display = 'none';
+      $('preview-situation').style.display = 'none';
       setTimeout(() => nextTemplate(), 1200);
     };
   });
