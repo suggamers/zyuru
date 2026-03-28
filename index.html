@@ -330,9 +330,9 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
         <ellipse cx="160" cy="92" rx="100" ry="4" fill="currentColor" opacity="0.06"/>
       </svg>
     </div>
-    <p class="title-sub">音列の違和感を、楽しむゲーム</p>
+    <p class="title-sub">音列の違和感を楽しむゲーム</p>
     <div class="title-desc">
-      <p>気持ち悪いフレーズを、自信満々に声に出してみよう。</p>
+      <p>気持ち悪いフレーズを自信満々に声に出してみよう。</p>
       <p>首筋から背中にかけての、あの「ぞわっ」を楽しもう。</p>
     </div>
     <div class="mode-buttons">
@@ -349,12 +349,10 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
     </div>
     <p class="title-note">声に出しながら楽しもう。</p>
 
-```
 <div class="credit">
   音声合成: <a href="https://voicevox.hiroshiba.jp/" target="_blank">VOICEVOX (ずんだもん)</a><br>
   API連携: <a href="https://tts.quest/" target="_blank">tts.quest</a>
 </div>
-```
 
   </div>
 
@@ -689,7 +687,7 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
   async function speakText(text, btnElement) {
     if (!text) return;
 
-    // 二重タップ防止：再生中なら止めて終了
+    // 再生中なら止めて終了（トグル動作）
     if (btnElement && btnElement.classList.contains('speaking')) {
       stopSpeak();
       return;
@@ -697,13 +695,10 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
 
     stopSpeak();
 
-    // ── ステップ1: ジェスチャー内でAudioオブジェクトを作り、即play()でロック ──
-    // iOS Safariではユーザー操作の同期コード内でplay()しないと再生が許可されない。
-    // muted状態で一度play()しておくことで再生コンテキストを確保する。
+    // ── ステップ1: ジェスチャー内で即 play() してiOS再生コンテキストを確保 ──
     const audio = new Audio();
     audio.muted = true;
-
-    // play()は失敗することがあるが、エラーを握り潰してコンテキスト確保を試みる
+    audio.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA='; // 無音wav
     const unlockPromise = audio.play().catch(() => {});
 
     currentAudio = audio;
@@ -717,41 +712,59 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
     }
 
     try {
-      // ── ステップ2: APIリクエスト ──
-      const pitch       = (Math.random() * 0.3  - 0.15).toFixed(2);
-      const speed       = (Math.random() * 0.4  + 0.8 ).toFixed(2);
-      const intonation  = (Math.random() * 0.5  + 0.5 ).toFixed(2);
+      // ── ステップ2: 合成リクエスト ──
+      const pitch      = (Math.random() * 0.3 - 0.15).toFixed(2);
+      const speed      = (Math.random() * 0.4 + 0.8 ).toFixed(2);
+      const intonation = (Math.random() * 0.5 + 0.5 ).toFixed(2);
 
       const apiUrl = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${pitch}&speedScale=${speed}&intonationScale=${intonation}`;
 
       const res = await fetch(apiUrl, { signal });
-      let data = await res.json();
+      const data = await res.json();
 
-      if (!data.success) throw new Error('APIエラー: ' + JSON.stringify(data));
-
-      // ── ステップ3: 音声生成完了までポーリング（最大20秒）──
-      let retries = 0;
-      while (!data.isAudioReady) {
-        if (retries++ > 20) throw new Error('音声生成タイムアウト');
-        await new Promise((resolve, reject) => {
-          const timer = setTimeout(resolve, 1000);
-          signal.addEventListener('abort', () => { clearTimeout(timer); reject(new DOMException('Aborted', 'AbortError')); });
-        });
-        const statusRes = await fetch(data.audioStatusUrl, { signal });
-        data = await statusRes.json();
-        if (data.isAudioError) throw new Error('音声生成に失敗しました');
+      // レート制限時: retryAfter が返る（success フィールドなし or false）
+      if (data.retryAfter) {
+        throw new Error(`rate_limit:${data.retryAfter}`);
+      }
+      if (!data.success) {
+        throw new Error('APIエラー: ' + JSON.stringify(data));
       }
 
-      // ── ステップ4: unlock待ち → src差し替え → 再生 ──
-      await unlockPromise; // muted play()の完了を待つ（既に解決済みでもOK）
+      // ── ステップ3: audioStatusUrl をポーリングして生成完了を待つ ──
+      // tts.quest仕様: 初回レスポンスに isAudioReady は含まれない。
+      // 別途 audioStatusUrl (status.json) をポーリングする。
+      const statusUrl = data.audioStatusUrl;
+      const mp3Url    = data.mp3DownloadUrl;
 
-      if (signal.aborted) return; // キャンセルされていたら何もしない
+      let ready = false;
+      let retries = 0;
+      while (!ready) {
+        if (retries++ > 30) throw new Error('timeout');
+        await new Promise((resolve, reject) => {
+          const t = setTimeout(resolve, 1000);
+          signal.addEventListener('abort', () => { clearTimeout(t); reject(new DOMException('Aborted','AbortError')); }, { once: true });
+        });
+        if (signal.aborted) return;
 
-      audio.muted = false;
+        const sRes  = await fetch(statusUrl, { signal });
+        const sData = await sRes.json();
+        if (sData.isAudioError) throw new Error('音声生成エラー');
+        if (sData.isAudioReady) { ready = true; break; }
+      }
+
+      if (signal.aborted) return;
+
+      // ── ステップ4: unlock完了 → src差し替え → 再生 ──
+      await unlockPromise;
+
+      if (signal.aborted) return;
+
+      audio.pause();
+      audio.muted         = false;
       audio.preservesPitch = false;
-      audio.playbackRate = 0.85 + Math.random() * 0.3;
-      audio.src = data.mp3DownloadUrl;
-      audio.load(); // srcを変えたらloadが必要
+      audio.playbackRate  = 0.85 + Math.random() * 0.3;
+      audio.src           = mp3Url;
+      audio.load();
 
       audio.onplay = () => {
         if (btnElement) {
@@ -761,27 +774,32 @@ button { cursor: pointer; background: none; border: none; font: inherit; color: 
           if (span) span.textContent = '再生中';
         }
       };
-
       audio.onended = () => {
         resetSpeakBtn(btnElement);
         currentAudio = null;
       };
-
       audio.onerror = () => {
         resetSpeakBtn(btnElement);
         currentAudio = null;
-        console.error('Audio load error');
         alert('音声の読み込みに失敗しました。');
       };
 
       await audio.play();
 
     } catch (err) {
-      if (err.name === 'AbortError') return; // ユーザーキャンセルは無視
+      if (err.name === 'AbortError') return;
       console.error(err);
       resetSpeakBtn(btnElement);
       currentAudio = null;
-      alert('通信に失敗しました。少し待ってから再度お試しください。');
+
+      if (err.message && err.message.startsWith('rate_limit:')) {
+        const sec = err.message.split(':')[1];
+        alert(`リクエストが混み合っています。${sec}秒ほど待ってからもう一度お試しください。`);
+      } else if (err.message === 'timeout') {
+        alert('音声生成がタイムアウトしました。もう一度お試しください。');
+      } else {
+        alert('音声生成に失敗しました。しばらく待ってから再度お試しください。');
+      }
     }
   }
 
