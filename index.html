@@ -644,150 +644,99 @@
     sound_b:["スュク","ジョヴィ","ブュン","ゾュッ","ペュキ","ニュキャ","ズィッ","グャム","シュポヴ","ヴュク"],
   };
 
-  // === 音声読み上げ（エラー非表示・シームレスフォールバック・トーンランダム化） ===
+  // === 音声読み上げ（安定リトライ版・アラート完全廃止・トーンランダム化） ===
   let currentAudio = new Audio();
   const SPEAKER_ID = 3; // ずんだもん
-  
-  // フォールバック用のブラウザ標準音声の準備
-  const synth = window.speechSynthesis;
-  let jpVoice = null;
-  function loadVoices() {
-    const voices = synth.getVoices();
-    jpVoice = voices.find(v => v.lang === 'ja-JP' || v.name.includes('Google 日本語')) || null;
-  }
-  if (synth && synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = loadVoices;
-  }
-  loadVoices();
 
   async function speakText(text, btnElement) {
     if (!text) return;
     stopSpeak();
 
+    let spanEl = null;
     if (btnElement) {
       btnElement.classList.add('loading');
-      btnElement.querySelector('span').textContent = '生成中...';
+      spanEl = btnElement.querySelector('span');
+      if (spanEl) spanEl.textContent = '生成中...';
     }
 
-    // 🎲 ランダムなトーン設定を生成
-    const isHighPitch = Math.random() > 0.5;
-    const vvPitch = (isHighPitch ? (Math.random() * 0.15) : -(Math.random() * 0.15)).toFixed(2);
-    const wsPitch = isHighPitch ? (1.2 + Math.random() * 0.8) : (0.2 + Math.random() * 0.6); // WebSpeech用
-    
-    const isFast = Math.random() > 0.5;
-    const vvSpeed = (isFast ? (1.0 + Math.random() * 0.3) : (0.7 + Math.random() * 0.2)).toFixed(2);
-    const wsSpeed = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3); // WebSpeech用
-
-    const intonation = (Math.random() * 0.5 + 0.5).toFixed(2);
-
-    // 🛡️ フォールバック機能（アラート一切なしで静かに切り替わる）
-    const fallbackToWebSpeech = () => {
-      if (!synth) {
-        // 万が一WebSpeechすら使えない環境でもエラー表示させず静かにボタンを戻す
-        if (btnElement) {
-          btnElement.classList.remove('loading', 'speaking');
-          btnElement.querySelector('span').textContent = '聴く';
-        }
-        return;
-      }
-      const utter = new SpeechSynthesisUtterance(text);
-      window._currentUtterance = utter; // ガベージコレクション対策
-      utter.lang = 'ja-JP';
-      if (jpVoice) utter.voice = jpVoice;
-      
-      utter.pitch = wsPitch;
-      utter.rate = wsSpeed;
-      utter.volume = 1.0;
-
-      utter.onstart = () => {
-        if (btnElement) {
-          btnElement.classList.remove('loading');
-          btnElement.classList.add('speaking');
-          btnElement.querySelector('span').textContent = '再生中';
-        }
-      };
-      utter.onend = () => {
-        if (btnElement) {
-          btnElement.classList.remove('speaking');
-          btnElement.querySelector('span').textContent = '聴く';
-        }
-      };
-      utter.onerror = () => {
-        if (btnElement) {
-          btnElement.classList.remove('loading', 'speaking');
-          btnElement.querySelector('span').textContent = '聴く';
-        }
-      };
-      synth.speak(utter);
-    };
-
     try {
-      // タイムアウト付きのフェッチ関数
-      const fetchWithTimeout = (url, ms) => {
-        return Promise.race([
-          fetch(url),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
-        ]);
-      };
+      // ランダムパラメータ（声の高さとスピード）
+      const pitch = (Math.random() * 0.3 - 0.15).toFixed(2);
+      const speed = (Math.random() * 0.4 + 0.8).toFixed(2);
+      const intonation = (Math.random() * 0.5 + 0.5).toFixed(2);
 
-      // 1. APIに生成をリクエスト
-      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${vvPitch}&speedScale=${vvSpeed}&intonationScale=${intonation}`;
-      const res = await fetchWithTimeout(url, 3000); // 3秒で見切りをつける
-      let data = await res.json();
+      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${pitch}&speedScale=${speed}&intonationScale=${intonation}`;
+      const res = await fetch(url);
+      const data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
 
-      // 2. サーバー側で音声が完成するまで待機（最大5秒まで短縮して待つ）
-      let attempts = 0;
-      while (!data.isAudioReady && attempts < 5) {
-        await new Promise(r => setTimeout(r, 1000));
-        const statusRes = await fetchWithTimeout(data.audioStatusUrl, 3000);
-        data = await statusRes.json();
-        if (data.isAudioError) throw new Error("音声生成失敗");
-        attempts++;
+      currentAudio.preservesPitch = false; 
+      currentAudio.playbackRate = 0.85 + Math.random() * 0.3; // テープの伸びたようなバグトーン
+      
+      // 裏側で何度も再生を試みる関数（最大15回リトライ）
+      const tryPlay = async (retryCount) => {
+        try {
+          currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
+          currentAudio.load();
+          await currentAudio.play();
+          return true; // 再生成功！
+        } catch (e) {
+          if (retryCount > 0) {
+            await new Promise(r => setTimeout(r, 1000));
+            return await tryPlay(retryCount - 1);
+          } else {
+            return false;
+          }
+        }
+      };
+
+      const isSuccess = await tryPlay(15);
+      
+      if (!isSuccess) {
+         throw new Error("生成タイムアウト");
       }
 
-      if (!data.isAudioReady) throw new Error("生成タイムアウト");
-
-      // 3. 準備ができた音声を再生
-      currentAudio.src = data.mp3DownloadUrl;
-      currentAudio.preservesPitch = false; 
-      
       currentAudio.onplay = () => {
         if (btnElement) {
           btnElement.classList.remove('loading');
           btnElement.classList.add('speaking');
-          btnElement.querySelector('span').textContent = '再生中';
+          if (spanEl) spanEl.textContent = '再生中';
         }
       };
       
       currentAudio.onended = () => {
         if (btnElement) {
           btnElement.classList.remove('speaking');
-          btnElement.querySelector('span').textContent = '聴く';
+          if (spanEl) spanEl.textContent = '聴く';
         }
       };
       
       currentAudio.onerror = () => {
-        // mp3取得エラー時はエラーダイアログ等出さずに静かにフォールバック
-        fallbackToWebSpeech();
+        throw new Error("読み込みエラー");
       };
 
-      await currentAudio.play();
-
     } catch (err) {
-      // エラーログだけ裏側に残し、ユーザーには何も知らせずシームレスにフォールバック
-      console.warn("VOICEVOX failed, switching to fallback.", err);
-      fallbackToWebSpeech();
+      // === エラー時のスマートな処理（アラートを出さず、ボタンの文字だけ変える） ===
+      console.error(err);
+      if (btnElement) {
+        btnElement.classList.remove('loading', 'speaking');
+        if (spanEl) {
+          spanEl.textContent = '混雑中...';
+          // 2秒後に何事もなかったかのように「聴く」に戻す
+          setTimeout(() => {
+            if (!btnElement.classList.contains('loading') && !btnElement.classList.contains('speaking')) {
+              spanEl.textContent = '聴く';
+            }
+          }, 2000);
+        }
+      }
     }
   }
 
   function stopSpeak() {
     if (currentAudio) {
       currentAudio.pause();
-    }
-    if (synth) {
-      synth.cancel();
     }
     document.querySelectorAll('.btn-speak').forEach(btn => {
       btn.classList.remove('speaking', 'loading');
