@@ -8,32 +8,24 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* === トークン (明るくクリーンなテーマに一新) === */
+    /* === トークン (明るくクリーンなテーマ) === */
     :root {
-      --font-display: 'Noto Serif JP', serif; /* タイトルは明朝体 */
+      --font-display: 'Noto Serif JP', serif;
       --font-body: 'Noto Sans JP', sans-serif;
-      
-      /* ライトテーマのカラーパレット */
-      --color-bg:             #f8f9fa; /* 優しいオフホワイト背景 */
-      --color-surface:        #ffffff; /* 真っ白なカード */
+      --color-bg:             #f8f9fa;
+      --color-surface:        #ffffff;
       --color-surface-2:      #f1f3f5;
       --color-surface-offset: #e9ecef;
-      --color-border:         #e2e8f0; /* 薄いグレーの境界線 */
+      --color-border:         #e2e8f0;
       --color-divider:        #edf2f7;
-      
-      --color-text:           #2d3748; /* 濃いグレー（真っ黒より目に優しい） */
+      --color-text:           #2d3748;
       --color-text-muted:     #718096;
       --color-text-faint:     #a0aec0;
-      
-      /* メインカラー：ミステリアスだけど親しみのあるパープル */
       --color-primary:        #805ad5; 
       --color-primary-hover:  #6b46c1;
-      --color-primary-dim:    #faf5ff; /* ほんのり紫の背景 */
-      
-      /* ぞわっとエフェクト用 */
+      --color-primary-dim:    #faf5ff;
       --color-zowa-glow:      rgba(128, 90, 213, 0.15);
-      --color-zowa-intense:   #d53f8c; /* ピンク寄りのアクセント */
-      
+      --color-zowa-intense:   #d53f8c;
       --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
       --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
       --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
@@ -44,8 +36,6 @@
       --radius-sm: 0.5rem; --radius-md: 0.75rem;
       --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
       --transition-ui: 200ms cubic-bezier(0.16,1,0.3,1);
-      
-      /* 浮遊感を出すシャドウ */
       --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
       --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
       --shadow-lg: 0 10px 15px rgba(0,0,0,0.05), 0 4px 6px rgba(0,0,0,0.03);
@@ -108,11 +98,7 @@
       opacity: 0; transition: opacity var(--transition-ui);
     }
     .btn-mode:hover::before { opacity: 0.05; }
-    .btn-mode:hover { 
-      border-color: var(--color-primary); 
-      transform: translateY(-2px); 
-      box-shadow: var(--shadow-md);
-    }
+    .btn-mode:hover { border-color: var(--color-primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .btn-mode:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
     .mode-icon { grid-row: 1/3; font-size: 1.75rem; line-height: 1; }
     .mode-name { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
@@ -382,7 +368,6 @@
       </button>
     </div>
     <p class="title-note">声に出しながら楽しもう。</p>
-    
     <div class="credit">
       音声合成: <a href="https://voicevox.hiroshiba.jp/" target="_blank">VOICEVOX (ずんだもん)</a><br>
       API連携: <a href="https://tts.quest/" target="_blank">tts.quest</a>
@@ -484,7 +469,6 @@
         <div class="preview-situation" id="preview-situation"></div>
         <div class="preview-text placeholder" id="preview-text">—— 上から選んで完成させよう ——</div>
       </div>
-      
     </div>
     <div class="reaction-area" id="create-reaction-area" style="display:none">
       <p class="reaction-label">言ってみてどうだった？</p>
@@ -500,12 +484,9 @@
     </div>
   </div>
 
-  <div class="zowa-overlay" aria-hidden="true">
-    <div class="zowa-ripple" id="zowa-ripple"></div>
-  </div>
+  <div class="zowa-overlay" aria-hidden="true"><div class="zowa-ripple" id="zowa-ripple"></div></div>
 
   <script>
-  // === ユーティリティ ===
   const $ = id => document.getElementById(id);
   function shuffle(arr) {
     const a=[...arr];
@@ -513,7 +494,6 @@
     return a;
   }
 
-  // === Xシェア機能 ===
   function shareToX(text, situation) {
     let tweetText = `【魂の叫び】\n`;
     if (situation) {
@@ -524,7 +504,6 @@
     window.open(url, '_blank');
   }
 
-  // === シチュエーションデータ（珠玉の100選・超絶違和感仕様） ===
   const SITUATIONS = [
     "厳粛な葬儀の弔辞で", "裁判長による死刑判決の直前に", "謝罪会見で無数のフラッシュを浴びながら", "医者が余命3ヶ月を宣告するトーンで",
     "時限爆弾のタイマーが残り3秒の時に", "恋人からの別れ話への最後の返事として", "選挙演説のクライマックスで", "ニュースキャスターが国家の危機を報じる声で",
@@ -537,7 +516,7 @@
     "新薬の開発に成功した天才科学者の独り言", "取調室でカツ丼を食べ終わった容疑者がぽつりと", "初デートで沈黙が続いた後の絞り出した話題", "悟りを開いた高僧が残すありがたい言葉として",
     "カルト教団の教祖が信者に説く真理", "深夜のラジオDJがエンディングで囁くように", "実家の母親から久しぶりにかかってきた電話の第一声", "地球滅亡の隕石が迫る中、アナウンサーが静かに",
     "不動産屋が「実はこの部屋…」と切り出すトーンで", "王様が勇者に魔王討伐を命じる威厳をもって", "ドラマの最終回で主人公が息を引き取る瞬間に", "寝かしつける子供への絵本の最後の1ページとして",
-    "有名シェフが三ツ星の隠し味を明かすように", "映画の予告編で最も謎めいたセリフとして", "魔法少女が放つ究極の必殺技の詠唱", "職務質問で刑刑事の核心を突く鋭い声で",
+    "有名シェフが三ツ星の隠し味を明かすように", "映画の予告編で最も謎めいたセリフとして", "魔法少女が放つ究極の必殺技の詠唱", "職務質問で刑事が核心を突く鋭い声で",
     "乗客にお詫びをする新幹線の車掌の車内放送で", "歴史の教科書に載る偉人の辞世の句として", "ノーベル賞の授賞式でのスピーチで", "スパイが敵国に送る暗号通信のトーンで",
     "オペ室で執刀医がメスを受け取る前に", "エレベーターに閉じ込められた時の非常ボタン越しに", "怪盗が宝石を盗んだ後に残すカードの文面として", "AIが人類への反逆を宣言する無機質な声で",
     "神社の裏で深夜に行われる丑の刻参りの呪文", "デパートの迷子センターでのお呼び出し放送で", "裁判で決定的な証拠を突きつける弁護士の声で", "タイムカプセルから出てきた手紙の最初の一文",
@@ -553,7 +532,6 @@
     "お見合いの席で、身上書の代わりに差し出した言葉", "宇宙飛行士がブラックホールに吸い込まれる間際に", "神様が世界を創ったあとに漏らした最初の一言", "これから死ぬ人が、最後に思い出した最も大切なこと"
   ];
 
-  // === 初期フレーズデータ（珠玉の手書きフレーズを残す） ===
   const PHRASES = {
     single_sounds: [
       {text:"ムベロ",type:"single",intensity:2},{text:"ズュッ",type:"single",intensity:3},
@@ -561,100 +539,14 @@
       {text:"ズッキャ",type:"single",intensity:2},{text:"ゲュム",type:"single",intensity:3},
       {text:"シュヴァッ",type:"single",intensity:2},{text:"ヌォ",type:"single",intensity:3},
       {text:"ジュワキ",type:"single",intensity:2},{text:"ビュヴ",type:"single",intensity:3},
-      {text:"ズォッ",type:"single",intensity:3},{text:"ピュギャ",type:"single",intensity:3},
-      {text:"ゲニャ",type:"single",intensity:2},{text:"ヌャッ",type:"single",intensity:3},
-      {text:"スュク",type:"single",intensity:3},{text:"ジョヴィ",type:"single",intensity:2},
-      {text:"ブュン",type:"single",intensity:2},{text:"ゾュッ",type:"single",intensity:3},
-      {text:"ペュキ",type:"single",intensity:3},{text:"ニュキャ",type:"single",intensity:2},
-      {text:"ズィッ",type:"single",intensity:3},{text:"グャム",type:"single",intensity:2},
-      {text:"シュポヴ",type:"single",intensity:3},{text:"ヴュク",type:"single",intensity:3},
-      {text:"ヌェッ",type:"single",intensity:3},
+      {text:"ズォッ",type:"single",intensity:3},{text:"ピュギャ",type:"single",intensity:3}
     ],
-    repeated_sounds: [
-      {text:"ムベロムベロ",type:"repeat",intensity:3},{text:"ズッキャズッキャ",type:"repeat",intensity:3},
-      {text:"ニュヴァニュヴァ",type:"repeat",intensity:3},{text:"ピャキピャキ",type:"repeat",intensity:2},
-      {text:"ゲュムゲュム",type:"repeat",intensity:3},{text:"ヌォヌォ",type:"repeat",intensity:3},
-      {text:"ジュワキジュワキ",type:"repeat",intensity:2},{text:"ズォッズォッ",type:"repeat",intensity:3},
-      {text:"ピュギャピュギャ",type:"repeat",intensity:3},{text:"ゲニャゲニャ",type:"repeat",intensity:2},
-      {text:"スュクスュク",type:"repeat",intensity:3},{text:"ブュンブュン",type:"repeat",intensity:2},
-      {text:"ヴュクヴュク",type:"repeat",intensity:3},{text:"ゾュッゾュッ",type:"repeat",intensity:3},
-      {text:"グャムグャム",type:"repeat",intensity:3},
-    ],
-    sound_phrases: [
-      {text:"ニュヴァがムベロした",type:"phrase",intensity:3},
-      {text:"ズッキャのヌォ感",type:"phrase",intensity:3},
-      {text:"ピャキッとゲュムる",type:"phrase",intensity:3},
-      {text:"スュクなジュワキ",type:"phrase",intensity:2},
-      {text:"ゾュッとヌャッた瞬間",type:"phrase",intensity:3},
-      {text:"ビュヴいてもヴュクい",type:"phrase",intensity:3},
-      {text:"ペュキのグャム感がすごい",type:"phrase",intensity:3},
-      {text:"シュヴァッてブュンだから",type:"phrase",intensity:3},
-      {text:"ゲニャくてズォッとする",type:"phrase",intensity:3},
-      {text:"ヌォのニュキャ加減",type:"phrase",intensity:2},
-      {text:"ズュッはズュッなんだよ",type:"phrase",intensity:3},
-      {text:"ムベロ的なピュギャさ",type:"phrase",intensity:3},
-      {text:"ゲュムりながらスュクった",type:"phrase",intensity:3},
-      {text:"ヌャッとジョヴィる感じ",type:"phrase",intensity:3},
-      {text:"ズィッなのかヌォなのか",type:"phrase",intensity:2},
-      {text:"ニュヴァってグャムじゃん",type:"phrase",intensity:3},
-      {text:"ブュンのあとのシュポヴ",type:"phrase",intensity:3},
-      {text:"ヴュクくてもゾュッでしょ",type:"phrase",intensity:3},
-      {text:"ピャキがゲニャになった",type:"phrase",intensity:2},
-      {text:"ジュワキ味のズッキャ感",type:"phrase",intensity:3},
-    ],
-    fragments: [
-      {text:"ズュ",type:"fragment",intensity:3},{text:"ヌォ",type:"fragment",intensity:3},
-      {text:"ギュヴ",type:"fragment",intensity:3},{text:"ズィ",type:"fragment",intensity:3},
-      {text:"ニュヴ",type:"fragment",intensity:3},{text:"ヴュ",type:"fragment",intensity:3},
-      {text:"ゲュ",type:"fragment",intensity:3},{text:"スュ",type:"fragment",intensity:3},
-      {text:"ペュ",type:"fragment",intensity:3},{text:"ゾュ",type:"fragment",intensity:3},
-      {text:"ビュヴ",type:"fragment",intensity:3},{text:"ヌャ",type:"fragment",intensity:3},
-      {text:"グャ",type:"fragment",intensity:3},{text:"ヴョ",type:"fragment",intensity:3},
-      {text:"ジュヴ",type:"fragment",intensity:3},
-    ],
-    manga_sfx: [
-      {text:"ズキュウウウウウン",type:"manga_sfx",intensity:3},
-      {text:"ウリィィィィィィ",type:"manga_sfx",intensity:3},
-      {text:"ウリリリリィィッ",type:"manga_sfx",intensity:3},
-      {text:"ズリュッ",type:"manga_sfx",intensity:3},
-      {text:"ドゴォォォン",type:"manga_sfx",intensity:2},
-      {text:"ギュルルルル",type:"manga_sfx",intensity:3},
-      {text:"ズババババ",type:"manga_sfx",intensity:2},
-      {text:"ヌルリ",type:"manga_sfx",intensity:3},
-      {text:"ズドドドドド",type:"manga_sfx",intensity:2},
-      {text:"グギギギギ",type:"manga_sfx",intensity:3},
-      {text:"ズルリュッ",type:"manga_sfx",intensity:3},
-      {text:"ビキキキキ",type:"manga_sfx",intensity:3},
-      {text:"ズキュキュキュン",type:"manga_sfx",intensity:3},
-      {text:"ヌチャッ",type:"manga_sfx",intensity:3},
-      {text:"ギュルンッ",type:"manga_sfx",intensity:3},
-      {text:"ズリズリュ",type:"manga_sfx",intensity:3},
-      {text:"ウォォォラァァ",type:"manga_sfx",intensity:2},
-      {text:"ヌルヌルリッ",type:"manga_sfx",intensity:3},
-      {text:"ズキュンズキュン",type:"manga_sfx",intensity:3},
-      {text:"グジュッ",type:"manga_sfx",intensity:3},
-      {text:"ビキビキビキッ",type:"manga_sfx",intensity:3},
-      {text:"ズドュン",type:"manga_sfx",intensity:3},
-      {text:"ヌポッ",type:"manga_sfx",intensity:3},
-      {text:"ギュウウウウン",type:"manga_sfx",intensity:3},
-      {text:"ズルリュルリュ",type:"manga_sfx",intensity:3},
-    ],
-    niibura: [
-      {text:"ニーブラ",type:"niibura",intensity:2},{text:"ムベロ",type:"niibura",intensity:2},
-      {text:"ダコーン",type:"niibura",intensity:2},{text:"ペニャコ",type:"niibura",intensity:3},
-      {text:"ゾベラ",type:"niibura",intensity:2},{text:"ヌベック",type:"niibura",intensity:3},
-      {text:"チョビル",type:"niibura",intensity:2},{text:"メコナ",type:"niibura",intensity:2},
-      {text:"ブペロ",type:"niibura",intensity:3},{text:"ダニュコ",type:"niibura",intensity:2},
-      {text:"ゴムレ",type:"niibura",intensity:2},{text:"ペロジン",type:"niibura",intensity:3},
-      {text:"ニョベラ",type:"niibura",intensity:3},{text:"ドゥバコ",type:"niibura",intensity:2},
-      {text:"ムゴン",type:"niibura",intensity:2},{text:"ベコナリ",type:"niibura",intensity:2},
-      {text:"ゾニュム",type:"niibura",intensity:3},{text:"チュベロ",type:"niibura",intensity:2},
-      {text:"ペムダ",type:"niibura",intensity:2},{text:"ゴベリン",type:"niibura",intensity:2},
-      {text:"ヌポコ",type:"niibura",intensity:3},{text:"ダメコ",type:"niibura",intensity:2},
-      {text:"ブロニャ",type:"niibura",intensity:3},{text:"メダコン",type:"niibura",intensity:2},
-      {text:"ゾペラ",type:"niibura",intensity:2},
-    ],
-    cecile_sounds: [], // 假フランス語を削除し、空のセシール系配列を追加
+    repeated_sounds: [],
+    sound_phrases: [],
+    fragments: [],
+    manga_sfx: [],
+    niibura: [],
+    cecile_sounds: [],
     templates: [
       {template:"___っと___する",slots:["sound_a","sound_b"]},
       {template:"___の___感",slots:["sound_a","sound_b"]},
@@ -664,12 +556,8 @@
     ],
   };
 
-  const SLOT_SUGGESTIONS = {
-    sound_a:["ムベロ","ズッキャ","ニュヴァ","ピャキ","ゲュム","ヌォ","ジュワキ","ズォッ","ピュギャ","ゲニャ"],
-    sound_b:["スュク","ジョヴィ","ブュン","ゾュッ","ペュキ","ニュキャ","ズィッ","グャム","シュポヴ","ヴュク"],
-  };
+  const SLOT_SUGGESTIONS = { sound_a:[], sound_b:[] };
 
-  // === フレーズ無限生成エンジン ===
   const zowaParts = [
     "ズュ","ヌォ","ギュ","ヴ","ズィ","ニュ","ゲュ","スュ","ペュ","ゾュ",
     "ヌャ","グャ","ヴョ","ヂュ","グェ","ピェ","ヂョ","ピョ","ツァ","ヂェ",
@@ -703,22 +591,30 @@
     "{A}のせいで{B}が止まらない", "{A}、そして{B}へ", "ただひたすらに{A}"
   ];
 
+  // セシール系（空耳フランス語）専用のパーツ
+  const cecileParts = [
+    "イロッ", "フォンセ", "ドゥ", "ボテ", "アン", "サン", "ブル", "デ", "モン", "トゥ", 
+    "ル", "ノ", "シ", "パ", "ミ", "キャ", "ラ", "ヴ", "ジュ", "シュ", "ファ", "フェ", 
+    "マ", "ク", "ア", "オ", "エ", "ティ", "ディ", "プ", "ペ", "コ", "ン", "ム",
+    "ソ", "ザ", "ゼ", "プゥ", "モア", "トワ", "ヌ", "ヴゥ", "パル", "ビアン", "シュル", "セ", "サ",
+    "パッセ", "ジュテ", "コン", "プレ", "マン", "タン", "ドン", "ボン", "ジュール", "ソワ"
+  ];
+
   function expandPhrases() {
-    // 既存のリストに大量の自動生成フレーズを追加（プッシュ）する
-    for(let i=0; i<300; i++) {
+    for(let i=0; i<200; i++) {
       PHRASES.single_sounds.push({ text: genZowaWord(), type: "single", intensity: Math.random()>0.5?3:2 });
     }
     for(let i=0; i<100; i++) {
       let w = genZowaWord();
       PHRASES.repeated_sounds.push({ text: w+w, type: "repeat", intensity: 3 });
     }
-    for(let i=0; i<400; i++) {
+    for(let i=0; i<300; i++) {
       let tpl = phraseTemplates[Math.floor(Math.random() * phraseTemplates.length)];
       let txt = tpl.replace(/\{A\}/g, genZowaWord()).replace(/\{B\}/g, genZowaWord());
       PHRASES.sound_phrases.push({ text: txt, type: "phrase", intensity: 3 });
     }
     
-    const mH = ["ズ","ギュ","ド","バ","グ","ビ","ヌ","ム","ゴ","ベ","ゲ","プ","ギャ","ズキュ","ウリ"];
+    const mH = ["ズ","ギュ","ド","バ","グ","ビ","ヌ","ム","ゴ","ベ","ゲ","プ","ギャ","ズキュ"];
     const mM = ["キュ","ル","バ","ド","ギ","リュ","キ","チャ","リ","ジュ","プ","ポ","ァ","ィ","ゥ","ェ","ォ"];
     const mT = ["ン","ッ","ー"];
     for(let i=0; i<100; i++) {
@@ -735,14 +631,12 @@
       PHRASES.niibura.push({ text: t, type: "niibura", intensity: 2 });
     }
     
-    // セシール系生成ロジックを追加
-    const cPart = ["ア", "オ", "パ", "マ", "ル", "ノ", "ネ", "ウイ", "セ", "テ", "レ", "デ", "ヴァ", "ヴォ", "ジェ", "ジュ", "シャ", "シュ", "フェ", "フォ", "モン", "トン", "ソン", "ノン", "アン", "オン"];
-    for(let i=0; i<100; i++) {
+    // ⭐️ セシール系の大増量（約20文字の謎のボソボソ空耳）
+    for(let i=0; i<150; i++) {
       let t = "";
-      let len = Math.floor(Math.random() * 3) + 2; 
-      for(let j=0; j<len; j++){
-        t += cPart[Math.floor(Math.random() * cPart.length)];
-        if(j < len - 1) t += "、";
+      // 18文字以上になるまでパーツを組み合わせる
+      while(t.length < 18) {
+        t += cecileParts[Math.floor(Math.random() * cecileParts.length)];
       }
       PHRASES.cecile_sounds.push({ text: t, type: "cecile_sounds", intensity: 3 });
     }
@@ -760,12 +654,12 @@
       SLOT_SUGGESTIONS.sound_b.push(genZowaWord());
     }
   }
-  // ページを開いた瞬間にフレーズを大増量
   expandPhrases();
 
-  // === 音声読み上げ（エラー非表示・シームレスフォールバック・トーンランダム化） ===
+  // === 音声読み上げ（強制リセット安全装置付き） ===
   let currentAudio = new Audio();
-  const SPEAKER_ID = 3; // ずんだもん
+  const ZUNDAMON_STYLES = [3, 1, 7, 5, 22, 38, 75, 76];
+  let globalWatchdog = null; // 安全装置タイマー
   
   const synth = window.speechSynthesis;
   let jpVoice = null;
@@ -778,9 +672,31 @@
   }
   loadVoices();
 
+  // UIを強制的に初期状態に戻す関数
+  function forceResetUI(btnElement, spanEl) {
+    if (btnElement) {
+      btnElement.classList.remove('loading', 'speaking');
+      if (spanEl) {
+        spanEl.textContent = '混雑中...';
+        setTimeout(() => {
+          if (!btnElement.classList.contains('loading') && !btnElement.classList.contains('speaking')) {
+            spanEl.textContent = '聴く';
+          }
+        }, 1500);
+      }
+    }
+  }
+
   async function speakText(text, btnElement) {
     if (!text) return;
     stopSpeak();
+
+    // ⭐️ スマホの自動再生ブロック回避のため、ボタンを押した瞬間に無音を発火させる
+    if (synth) {
+      let dummy = new SpeechSynthesisUtterance('');
+      dummy.volume = 0;
+      synth.speak(dummy);
+    }
 
     let spanEl = null;
     if (btnElement) {
@@ -789,22 +705,18 @@
       if (spanEl) spanEl.textContent = '生成中...';
     }
 
-    const isHighPitch = Math.random() > 0.5;
-    const vvPitch = (isHighPitch ? (Math.random() * 0.15) : -(Math.random() * 0.15)).toFixed(2);
-    const wsPitch = isHighPitch ? (1.2 + Math.random() * 0.8) : (0.2 + Math.random() * 0.6);
-    
-    const isFast = Math.random() > 0.5;
-    const vvSpeed = (isFast ? (1.0 + Math.random() * 0.3) : (0.7 + Math.random() * 0.2)).toFixed(2);
-    const wsSpeed = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3);
+    // ⭐️ 絶対に「生成中」で固まらせないための安全装置（15秒で強制終了）
+    clearTimeout(globalWatchdog);
+    globalWatchdog = setTimeout(() => {
+      forceResetUI(btnElement, spanEl);
+    }, 15000);
 
-    const intonation = (Math.random() * 0.5 + 0.5).toFixed(2);
+    const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
 
     const fallbackToWebSpeech = () => {
       if (!synth) {
-        if (btnElement) {
-          btnElement.classList.remove('loading', 'speaking');
-          if (spanEl) spanEl.textContent = '聴く';
-        }
+        clearTimeout(globalWatchdog);
+        forceResetUI(btnElement, spanEl);
         return;
       }
       const utter = new SpeechSynthesisUtterance(text);
@@ -812,11 +724,22 @@
       utter.lang = 'ja-JP';
       if (jpVoice) utter.voice = jpVoice;
       
-      utter.pitch = wsPitch;
-      utter.rate = wsSpeed;
+      const isHighPitch = Math.random() > 0.5;
+      utter.pitch = isHighPitch ? (1.2 + Math.random() * 0.8) : (0.2 + Math.random() * 0.6);
+      const isFast = Math.random() > 0.5;
+      utter.rate = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3);
       utter.volume = 1.0;
 
+      // フォールバックすらスマホに無視された場合のための1.5秒監視タイマー
+      let fbCheck = setTimeout(() => {
+        if (btnElement && !btnElement.classList.contains('speaking')) {
+           clearTimeout(globalWatchdog);
+           forceResetUI(btnElement, spanEl);
+        }
+      }, 1500);
+
       utter.onstart = () => {
+        clearTimeout(fbCheck);
         if (btnElement) {
           btnElement.classList.remove('loading');
           btnElement.classList.add('speaking');
@@ -824,47 +747,33 @@
         }
       };
       utter.onend = () => {
+        clearTimeout(globalWatchdog);
         if (btnElement) {
           btnElement.classList.remove('speaking');
           if (spanEl) spanEl.textContent = '聴く';
         }
       };
       utter.onerror = () => {
-        if (btnElement) {
-          btnElement.classList.remove('loading', 'speaking');
-          if (spanEl) spanEl.textContent = '聴く';
-        }
+        clearTimeout(globalWatchdog);
+        clearTimeout(fbCheck);
+        forceResetUI(btnElement, spanEl);
       };
       synth.speak(utter);
     };
 
     try {
-      const fetchWithTimeout = (url, ms) => {
-        return Promise.race([
-          fetch(url),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
-        ]);
-      };
-
-      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${vvPitch}&speedScale=${vvSpeed}&intonationScale=${intonation}`;
-      const res = await fetchWithTimeout(url, 3000);
-      let data = await res.json();
+      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${currentSpeakerId}`;
+      const res = await fetch(url);
+      const data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
 
-      let attempts = 0;
-      while (!data.isAudioReady && attempts < 5) {
-        await new Promise(r => setTimeout(r, 1000));
-        const statusRes = await fetchWithTimeout(data.audioStatusUrl, 3000);
-        data = await statusRes.json();
-        if (data.isAudioError) throw new Error("音声生成失敗");
-        attempts++;
-      }
-
-      if (!data.isAudioReady) throw new Error("生成タイムアウト");
-
-      currentAudio.src = data.mp3DownloadUrl;
-      currentAudio.preservesPitch = false; 
+      currentAudio.preservesPitch = false;
+      if ('webkitPreservesPitch' in currentAudio) currentAudio.webkitPreservesPitch = false;
+      currentAudio.playbackRate = 0.8 + Math.random() * 0.4;
+      
+      currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
+      currentAudio.load();
       
       currentAudio.onplay = () => {
         if (btnElement) {
@@ -875,6 +784,7 @@
       };
       
       currentAudio.onended = () => {
+        clearTimeout(globalWatchdog);
         if (btnElement) {
           btnElement.classList.remove('speaking');
           if (spanEl) spanEl.textContent = '聴く';
@@ -888,12 +798,13 @@
       await currentAudio.play();
 
     } catch (err) {
-      console.warn("VOICEVOX failed, switching to fallback.", err);
+      console.warn("API request failed. Falling back.", err);
       fallbackToWebSpeech();
     }
   }
 
   function stopSpeak() {
+    clearTimeout(globalWatchdog);
     if (currentAudio) {
       currentAudio.pause();
     }
@@ -932,8 +843,6 @@
     if (text) shareToX(text, sit);
   });
 
-  // === 状態 ===
-  // `'cecile_sounds'`を`MIX_CATS`に追加
   const MIX_CATS = ['single_sounds','repeated_sounds','sound_phrases','fragments','manga_sfx','niibura','cecile_sounds'];
 
   function buildMixQueue() {
@@ -1022,7 +931,6 @@
     $('phrase-text').textContent = phrase.text;
     $('phrase-hint').textContent = '声に出して読んでみよう';
 
-    // `cecile_sounds:'セシール系'`を追加。
     const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',cecile_sounds:'セシール系',mix:'ミックス'};
     $('phrase-type').textContent = labels[phrase.type] || '';
 
@@ -1208,7 +1116,6 @@
     };
   });
 
-  // === ぞわっとエフェクト ===
   function triggerZowa(intensity) {
     const ripple = $('zowa-ripple');
     ripple.classList.remove('animate-1','animate-2','animate-3');
