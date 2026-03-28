@@ -735,20 +735,20 @@
   // ページを開いた瞬間にフレーズを大増量
   expandPhrases();
 
-  // === 音声読み上げ（エラー非表示・シームレスフォールバック・トーンランダム化） ===
+  // === 音声読み上げ（ずんだもんのスタイルランダム化・自動リトライ・エラー非表示） ===
   let currentAudio = new Audio();
-  const SPEAKER_ID = 3; // ずんだもん
   
-  const synth = window.speechSynthesis;
-  let jpVoice = null;
-  function loadVoices() {
-    const voices = synth.getVoices();
-    jpVoice = voices.find(v => v.lang === 'ja-JP' || v.name.includes('Google 日本語')) || null;
-  }
-  if (synth && synth.onvoiceschanged !== undefined) {
-    synth.onvoiceschanged = loadVoices;
-  }
-  loadVoices();
+  // ★ ずんだもんの持つ8つのスタイルID（感情）
+  const ZUNDAMON_STYLES = [
+    3,  // ノーマル
+    1,  // あまあま
+    7,  // ツンツン
+    5,  // セクシー
+    22, // ささやき
+    38, // ヒソヒソ
+    75, // ヘロヘロ
+    76  // なみだめ
+  ];
 
   async function speakText(text, btnElement) {
     if (!text) return;
@@ -761,83 +761,46 @@
       if (spanEl) spanEl.textContent = '生成中...';
     }
 
-    const isHighPitch = Math.random() > 0.5;
-    const vvPitch = (isHighPitch ? (Math.random() * 0.15) : -(Math.random() * 0.15)).toFixed(2);
-    const wsPitch = isHighPitch ? (1.2 + Math.random() * 0.8) : (0.2 + Math.random() * 0.6);
-    
-    const isFast = Math.random() > 0.5;
-    const vvSpeed = (isFast ? (1.0 + Math.random() * 0.3) : (0.7 + Math.random() * 0.2)).toFixed(2);
-    const wsSpeed = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3);
-
-    const intonation = (Math.random() * 0.5 + 0.5).toFixed(2);
-
-    const fallbackToWebSpeech = () => {
-      if (!synth) {
-        if (btnElement) {
-          btnElement.classList.remove('loading', 'speaking');
-          if (spanEl) spanEl.textContent = '聴く';
-        }
-        return;
-      }
-      const utter = new SpeechSynthesisUtterance(text);
-      window._currentUtterance = utter;
-      utter.lang = 'ja-JP';
-      if (jpVoice) utter.voice = jpVoice;
-      
-      utter.pitch = wsPitch;
-      utter.rate = wsSpeed;
-      utter.volume = 1.0;
-
-      utter.onstart = () => {
-        if (btnElement) {
-          btnElement.classList.remove('loading');
-          btnElement.classList.add('speaking');
-          if (spanEl) spanEl.textContent = '再生中';
-        }
-      };
-      utter.onend = () => {
-        if (btnElement) {
-          btnElement.classList.remove('speaking');
-          if (spanEl) spanEl.textContent = '聴く';
-        }
-      };
-      utter.onerror = () => {
-        if (btnElement) {
-          btnElement.classList.remove('loading', 'speaking');
-          if (spanEl) spanEl.textContent = '聴く';
-        }
-      };
-      synth.speak(utter);
-    };
-
     try {
-      const fetchWithTimeout = (url, ms) => {
-        return Promise.race([
-          fetch(url),
-          new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), ms))
-        ]);
-      };
+      // ずんだもんのスタイルを完全ランダム化
+      const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
 
-      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${vvPitch}&speedScale=${vvSpeed}&intonationScale=${intonation}`;
-      const res = await fetchWithTimeout(url, 3000);
-      let data = await res.json();
+      const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${currentSpeakerId}`;
+      const res = await fetch(url);
+      const data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
 
-      let attempts = 0;
-      while (!data.isAudioReady && attempts < 5) {
-        await new Promise(r => setTimeout(r, 1000));
-        const statusRes = await fetchWithTimeout(data.audioStatusUrl, 3000);
-        data = await statusRes.json();
-        if (data.isAudioError) throw new Error("音声生成失敗");
-        attempts++;
+      // ブラウザ側でのバグトーン付与（テープの伸びたような遅さ〜早口）
+      currentAudio.preservesPitch = false;
+      if ('webkitPreservesPitch' in currentAudio) {
+        currentAudio.webkitPreservesPitch = false;
+      }
+      currentAudio.playbackRate = 0.8 + Math.random() * 0.4; // 0.8倍(低い・遅い) 〜 1.2倍(高い・速い)
+      
+      // 自動リトライ関数（最大15回）
+      const tryPlay = async (retryCount) => {
+        try {
+          currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
+          currentAudio.load();
+          await currentAudio.play();
+          return true; // 再生成功！
+        } catch (e) {
+          if (retryCount > 0) {
+            await new Promise(r => setTimeout(r, 1000));
+            return await tryPlay(retryCount - 1);
+          } else {
+            return false;
+          }
+        }
+      };
+
+      const isSuccess = await tryPlay(15);
+      
+      if (!isSuccess) {
+         throw new Error("生成タイムアウト");
       }
 
-      if (!data.isAudioReady) throw new Error("生成タイムアウト");
-
-      currentAudio.src = data.mp3DownloadUrl;
-      currentAudio.preservesPitch = false; 
-      
       currentAudio.onplay = () => {
         if (btnElement) {
           btnElement.classList.remove('loading');
@@ -854,23 +817,29 @@
       };
       
       currentAudio.onerror = () => {
-        fallbackToWebSpeech();
+        throw new Error("読み込みエラー");
       };
 
-      await currentAudio.play();
-
     } catch (err) {
-      console.warn("VOICEVOX failed, switching to fallback.", err);
-      fallbackToWebSpeech();
+      // エラー時はアラートを出さず、文字だけ「混雑中...」にしてスッと戻す
+      console.error(err);
+      if (btnElement) {
+        btnElement.classList.remove('loading', 'speaking');
+        if (spanEl) {
+          spanEl.textContent = '混雑中...';
+          setTimeout(() => {
+            if (!btnElement.classList.contains('loading') && !btnElement.classList.contains('speaking')) {
+              spanEl.textContent = '聴く';
+            }
+          }, 2000);
+        }
+      }
     }
   }
 
   function stopSpeak() {
     if (currentAudio) {
       currentAudio.pause();
-    }
-    if (synth) {
-      synth.cancel();
     }
     document.querySelectorAll('.btn-speak').forEach(btn => {
       btn.classList.remove('speaking', 'loading');
@@ -879,7 +848,7 @@
     });
   }
 
-  // ボタンのイベントリスナー
+  // ボタンのイベントリスナー（シチュエーション渡し対応）
   $('btn-speak').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
@@ -978,6 +947,7 @@
     const phrase = r.queue.pop();
     r.current = phrase;
     
+    // ランダムなシチュエーションをセット
     r.currentSituation = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
     const sitEl = $('phrase-situation');
     sitEl.textContent = `【状況：${r.currentSituation}】`;
@@ -1057,6 +1027,7 @@
     c.current = templates[c.templateIndex];
     c.selections = {};
     
+    // ランダムなシチュエーションをセット
     c.currentSituation = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
     
     $('template-text').textContent = c.current.template;
