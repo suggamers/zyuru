@@ -251,11 +251,15 @@
       background: var(--color-surface-2); border: 1px solid var(--color-border);
       border-radius: var(--radius-xl); padding: var(--space-6);
       transition: border-color var(--transition-ui);
+      position: relative;
     }
     .preview-card.ready { border-color: var(--color-primary-dim); }
     .preview-text { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-primary); line-height: 1.6; min-height: 2.4em; }
     .preview-text.placeholder { color: var(--color-text-faint); font-weight: 400; }
     .create-actions { display: flex; gap: var(--space-3); flex-shrink: 0; margin-top: var(--space-4); }
+
+    /* プレビューカード用のスピークボタン配置 */
+    .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
 
     /* === ぞわっとエフェクト === */
     .zowa-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 100; display: flex; align-items: center; justify-content: center; }
@@ -288,7 +292,6 @@
 </head>
 <body>
 
-  <!-- タイトル画面 -->
   <div id="screen-title" class="screen active">
     <div class="title-logo" aria-label="ぞわっと">
       <svg viewBox="0 0 320 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -317,7 +320,6 @@
     <p class="title-note">声に出しながら楽しもう。</p>
   </div>
 
-  <!-- 読むモード -->
   <div id="screen-read" class="screen">
     <header class="game-header">
       <button class="btn-back" id="read-back" aria-label="タイトルに戻る">
@@ -371,7 +373,6 @@
     </div>
   </div>
 
-  <!-- 作るモード -->
   <div id="screen-create" class="screen">
     <header class="game-header">
       <button class="btn-back" id="create-back" aria-label="タイトルに戻る">
@@ -389,10 +390,18 @@
         <div class="template-text" id="template-text">タップでテンプレを引く</div>
       </div>
       <div class="slots-area" id="slots-area"></div>
+      
       <div class="preview-card" id="preview-card">
-        <p class="preview-label">完成フレーズ</p>
+        <div class="preview-header">
+          <p class="preview-label" style="margin:0;">完成フレーズ</p>
+          <button class="btn-speak" id="btn-speak-create" style="display:none" aria-label="読み上げる">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+            <span>聴く</span>
+          </button>
+        </div>
         <div class="preview-text placeholder" id="preview-text">—— 上から選んで完成させよう ——</div>
       </div>
+      
     </div>
     <div class="reaction-area" id="create-reaction-area" style="display:none">
       <p class="reaction-label">言ってみてどうだった？</p>
@@ -408,7 +417,6 @@
     </div>
   </div>
 
-  <!-- ぞわっとエフェクト -->
   <div class="zowa-overlay" aria-hidden="true">
     <div class="zowa-ripple" id="zowa-ripple"></div>
   </div>
@@ -473,7 +481,6 @@
       {text:"グャ",type:"fragment",intensity:3},{text:"ヴョ",type:"fragment",intensity:3},
       {text:"ジュヴ",type:"fragment",intensity:3},
     ],
-    // ジョジョ・漫画撃音系：読み方がわからない・口が追いつかない
     manga_sfx: [
       {text:"ズキュウウウウウン",type:"manga_sfx",intensity:3},
       {text:"ウリィィィィィィ",type:"manga_sfx",intensity:3},
@@ -501,60 +508,34 @@
       {text:"ギュウウウウン",type:"manga_sfx",intensity:3},
       {text:"ズルリュルリュ",type:"manga_sfx",intensity:3},
     ],
-    // ニーブラ系：何かを指してそうで何も指していない固有名詞っぽい造語
     niibura: [
-      {text:"ニーブラ",type:"niibura",intensity:2},
-      {text:"ムベロ",type:"niibura",intensity:2},
-      {text:"ダコーン",type:"niibura",intensity:2},
-      {text:"ペニャコ",type:"niibura",intensity:3},
-      {text:"ゾベラ",type:"niibura",intensity:2},
-      {text:"ヌベック",type:"niibura",intensity:3},
-      {text:"チョビル",type:"niibura",intensity:2},
-      {text:"メコナ",type:"niibura",intensity:2},
-      {text:"ブペロ",type:"niibura",intensity:3},
-      {text:"ダニュコ",type:"niibura",intensity:2},
-      {text:"ゴムレ",type:"niibura",intensity:2},
-      {text:"ペロジン",type:"niibura",intensity:3},
-      {text:"ニョベラ",type:"niibura",intensity:3},
-      {text:"ドゥバコ",type:"niibura",intensity:2},
-      {text:"ムゴン",type:"niibura",intensity:2},
-      {text:"ベコナリ",type:"niibura",intensity:2},
-      {text:"ゾニュム",type:"niibura",intensity:3},
-      {text:"チュベロ",type:"niibura",intensity:2},
-      {text:"ペムダ",type:"niibura",intensity:2},
-      {text:"ゴベリン",type:"niibura",intensity:2},
-      {text:"ヌポコ",type:"niibura",intensity:3},
-      {text:"ダメコ",type:"niibura",intensity:2},
-      {text:"ブロニャ",type:"niibura",intensity:3},
-      {text:"メダコン",type:"niibura",intensity:2},
+      {text:"ニーブラ",type:"niibura",intensity:2},{text:"ムベロ",type:"niibura",intensity:2},
+      {text:"ダコーン",type:"niibura",intensity:2},{text:"ペニャコ",type:"niibura",intensity:3},
+      {text:"ゾベラ",type:"niibura",intensity:2},{text:"ヌベック",type:"niibura",intensity:3},
+      {text:"チョビル",type:"niibura",intensity:2},{text:"メコナ",type:"niibura",intensity:2},
+      {text:"ブペロ",type:"niibura",intensity:3},{text:"ダニュコ",type:"niibura",intensity:2},
+      {text:"ゴムレ",type:"niibura",intensity:2},{text:"ペロジン",type:"niibura",intensity:3},
+      {text:"ニョベラ",type:"niibura",intensity:3},{text:"ドゥバコ",type:"niibura",intensity:2},
+      {text:"ムゴン",type:"niibura",intensity:2},{text:"ベコナリ",type:"niibura",intensity:2},
+      {text:"ゾニュム",type:"niibura",intensity:3},{text:"チュベロ",type:"niibura",intensity:2},
+      {text:"ペムダ",type:"niibura",intensity:2},{text:"ゴベリン",type:"niibura",intensity:2},
+      {text:"ヌポコ",type:"niibura",intensity:3},{text:"ダメコ",type:"niibura",intensity:2},
+      {text:"ブロニャ",type:"niibura",intensity:3},{text:"メダコン",type:"niibura",intensity:2},
       {text:"ゾペラ",type:"niibura",intensity:2},
     ],
-    // 偽フランス語系：発音しにくい・脳が止まる組み合わせのみ残す
     fake_french: [
-      {text:"ブランシュヴォ",type:"fake_french",intensity:3},
-      {text:"ブォルデナール",type:"fake_french",intensity:3},
-      {text:"モンプゥルヴァ",type:"fake_french",intensity:3},
-      {text:"トゥネルボワ",type:"fake_french",intensity:3},
-      {text:"ブルデモントゥ",type:"fake_french",intensity:3},
-      {text:"トゥルシュヴァ",type:"fake_french",intensity:3},
-      {text:"ブランヴォネール",type:"fake_french",intensity:3},
-      {text:"シュルヴァネ",type:"fake_french",intensity:3},
-      {text:"ヴァルネシュ",type:"fake_french",intensity:3},
-      {text:"モントゥルボァ",type:"fake_french",intensity:3},
-      {text:"トゥレモンシュ",type:"fake_french",intensity:3},
-      {text:"ブレモンドゥァ",type:"fake_french",intensity:3},
-      {text:"フェンルボァ",type:"fake_french",intensity:3},
-      {text:"セトゥルバーヌ",type:"fake_french",intensity:3},
-      {text:"フェルモンシュ",type:"fake_french",intensity:3},
-      {text:"フェドランヴァ",type:"fake_french",intensity:3},
-      {text:"フェランシュボ",type:"fake_french",intensity:3},
-      {text:"セトゥモンシュ",type:"fake_french",intensity:3},
-      {text:"ブォルヴァシュ",type:"fake_french",intensity:3},
-      {text:"フェヴランドゥボ",type:"fake_french",intensity:3},
-      {text:"セュルブォネ",type:"fake_french",intensity:3},
-      {text:"ヴォルデュシュ",type:"fake_french",intensity:3},
-      {text:"フェボランシュ",type:"fake_french",intensity:3},
-      {text:"セドゥルヴォァ",type:"fake_french",intensity:3},
+      {text:"ブランシュヴォ",type:"fake_french",intensity:3},{text:"ブォルデナール",type:"fake_french",intensity:3},
+      {text:"モンプゥルヴァ",type:"fake_french",intensity:3},{text:"トゥネルボワ",type:"fake_french",intensity:3},
+      {text:"ブルデモントゥ",type:"fake_french",intensity:3},{text:"トゥルシュヴァ",type:"fake_french",intensity:3},
+      {text:"ブランヴォネール",type:"fake_french",intensity:3},{text:"シュルヴァネ",type:"fake_french",intensity:3},
+      {text:"ヴァルネシュ",type:"fake_french",intensity:3},{text:"モントゥルボァ",type:"fake_french",intensity:3},
+      {text:"トゥレモンシュ",type:"fake_french",intensity:3},{text:"ブレモンドゥァ",type:"fake_french",intensity:3},
+      {text:"フェンルボァ",type:"fake_french",intensity:3},{text:"セトゥルバーヌ",type:"fake_french",intensity:3},
+      {text:"フェルモンシュ",type:"fake_french",intensity:3},{text:"フェドランヴァ",type:"fake_french",intensity:3},
+      {text:"フェランシュボ",type:"fake_french",intensity:3},{text:"セトゥモンシュ",type:"fake_french",intensity:3},
+      {text:"ブォルヴァシュ",type:"fake_french",intensity:3},{text:"フェヴランドゥボ",type:"fake_french",intensity:3},
+      {text:"セュルブォネ",type:"fake_french",intensity:3},{text:"ヴォルデュシュ",type:"fake_french",intensity:3},
+      {text:"フェボランシュ",type:"fake_french",intensity:3},{text:"セドゥルヴォァ",type:"fake_french",intensity:3},
       {text:"ブォヴランシュ",type:"fake_french",intensity:3},
     ],
     templates: [
@@ -570,41 +551,73 @@
     sound_b:["スュク","ジョヴィ","ブュン","ゾュッ","ペュキ","ニュキャ","ズィッ","グャム","シュポヴ","ヴュク"],
   };
 
-  // === 音声読み上げ（iOS Safari対応） ===
+  // === 音声読み上げ（Web Speech API 改善版） ===
   const synth = window.speechSynthesis;
+  let jpVoice = null;
+  window._currentUtterance = null; // ガベージコレクションバグ対策
 
-  // iOS Safariは必ずユーザー操作のイベントハンドラ内でspeech.speak()を呼ぶ必要がある
-  // utteranceをbtn.onclickの中で直接生成・実行することで制限を回避する
-  function speakText(text, btn) {
+  // 日本語の音声を確実に取得する関数
+  function loadVoices() {
+    const voices = synth.getVoices();
+    // Google日本語音声やブラウザ標準の日本語を優先して探す
+    jpVoice = voices.find(v => v.lang === 'ja-JP' || v.name.includes('Google 日本語')) || null;
+  }
+  
+  // 音声リストが読み込まれたときに再取得する（Chrome等の非同期読み込み対策）
+  if (synth && synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = loadVoices;
+  }
+  loadVoices(); // 初回実行
+
+  // しゃべる処理を一本化
+  function speakText(text, btnElement) {
     if (!synth) return;
-    synth.cancel();
+    synth.cancel(); // 再生中の音声を停止
+
     const utter = new SpeechSynthesisUtterance(text);
+    window._currentUtterance = utter; // バグ回避のためグローバルに保持
+
     utter.lang = 'ja-JP';
+    if (jpVoice) utter.voice = jpVoice;
+    
+    // 気持ち悪さを出すため、少しゆっくり・低めに設定
     utter.rate = 0.75;
     utter.pitch = 0.8;
     utter.volume = 1.0;
-    utter.onstart = () => { if (btn) btn.classList.add('speaking'); };
-    utter.onend   = () => { if (btn) btn.classList.remove('speaking'); };
-    utter.onerror = () => { if (btn) btn.classList.remove('speaking'); };
+
+    utter.onstart = () => { if (btnElement) btnElement.classList.add('speaking'); };
+    utter.onend   = () => { if (btnElement) btnElement.classList.remove('speaking'); };
+    utter.onerror = () => { if (btnElement) btnElement.classList.remove('speaking'); };
+    
     synth.speak(utter);
   }
+
+  // しゃべるのを強制終了する関数
   function stopSpeak() {
     if (synth) synth.cancel();
-    const btn = document.getElementById('btn-speak');
-    if (btn) btn.classList.remove('speaking');
+    document.querySelectorAll('.btn-speak').forEach(btn => btn.classList.remove('speaking'));
   }
 
+  // 読むモードの音声ボタン
+  $('btn-speak').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const text = this.dataset.phrase;
+    if (text) speakText(text, this);
+  });
+
+  // 作るモードの音声ボタン（新規追加）
+  $('btn-speak-create').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const text = this.dataset.phrase;
+    if (text) speakText(text, this);
+  });
+
   // === 状態 ===
-  // ミックス用：全カテゴリのキー
   const MIX_CATS = ['single_sounds','repeated_sounds','sound_phrases','fragments','manga_sfx','niibura','fake_french'];
 
-  // ミックスキューを作る：同じカテゴリが2回連続しないよう並び替える
   function buildMixQueue() {
-    // 各カテゴリからプールを作り、カテゴリ情報を保持
     let pools = {};
     MIX_CATS.forEach(cat => { pools[cat] = shuffle([...PHRASES[cat]]); });
-
-    // 各カテゴリを交互に並べる（同カテゴリ連続を構造的に防ぐ）
     const result = [];
     const counts = {};
     MIX_CATS.forEach(c => counts[c] = pools[c].length);
@@ -613,14 +626,13 @@
     let remaining = {...counts};
 
     for (let i = 0; i < total; i++) {
-      // 残りのあるカテゴリから、前回と別のカテゴリをランダム選択
       const available = MIX_CATS.filter(c => remaining[c] > 0 && c !== lastCat);
       if (available.length === 0) break;
       const cat = available[Math.floor(Math.random() * available.length)];
       result.push(pools[cat][--remaining[cat]]);
       lastCat = cat;
     }
-    return result.reverse(); // popで取り出すので逆順
+    return result.reverse();
   }
 
   const state = {
@@ -644,7 +656,7 @@
   $('btn-read').onclick   = () => { showScreen('read');   initRead(); };
   $('btn-create').onclick = () => { showScreen('create'); initCreate(); };
   $('read-back').onclick   = () => { stopSpeak(); showScreen('title'); };
-  $('create-back').onclick = () => showScreen('title');
+  $('create-back').onclick = () => { stopSpeak(); showScreen('title'); };
 
   // === 読むモード ===
   function initRead() {
@@ -670,7 +682,7 @@
   });
 
   $('phrase-card').onclick = (e) => {
-    if (e.target.closest('#btn-speak')) return;
+    if (e.target.closest('.btn-speak')) return;
     if (!state.read.awaitingReaction) nextPhrase();
   };
 
@@ -702,25 +714,6 @@
       r.awaitingReaction = true;
     }, 600);
   }
-
-  $('btn-speak').addEventListener('click', function(e) {
-    e.stopPropagation();
-    const btn = this;
-    const text = btn.dataset.phrase;
-    if (!text) return;
-    if (!window.speechSynthesis) return;
-    // iOS Safari: utteranceをここで直接生成してspeak()
-    window.speechSynthesis.cancel();
-    const utter = new SpeechSynthesisUtterance(text);
-    utter.lang   = 'ja-JP';
-    utter.rate   = 0.75;
-    utter.pitch  = 0.8;
-    utter.volume = 1.0;
-    utter.onstart = () => btn.classList.add('speaking');
-    utter.onend   = () => btn.classList.remove('speaking');
-    utter.onerror = () => btn.classList.remove('speaking');
-    window.speechSynthesis.speak(utter);
-  });
 
   document.querySelectorAll('#reaction-area .btn-reaction').forEach(btn => {
     btn.onclick = () => {
@@ -756,6 +749,7 @@
     state.create.selections = {};
     nextTemplate();
     $('create-reaction-area').style.display = 'none';
+    $('btn-speak-create').style.display = 'none';
   }
 
   function nextTemplate() {
@@ -765,6 +759,7 @@
     c.current = templates[c.templateIndex];
     c.selections = {};
     $('template-text').textContent = c.current.template;
+    stopSpeak();
     renderSlots();
     updatePreview();
   }
@@ -811,18 +806,30 @@
       if (c.selections[idx]) text = text.replace('___', c.selections[idx]);
       else allFilled = false;
     });
+    
     const el = $('preview-text');
     const card = $('preview-card');
+    const speakBtn = $('btn-speak-create');
+    
     if (Object.keys(c.selections).length === 0) {
       el.textContent = '—— 上から選んで完成させよう ——';
       el.classList.add('placeholder');
       card.classList.remove('ready');
+      speakBtn.style.display = 'none';
       $('create-reaction-area').style.display = 'none';
     } else {
       el.textContent = text;
       el.classList.remove('placeholder');
-      if (allFilled) { card.classList.add('ready'); $('create-reaction-area').style.display = 'flex'; }
-      else { card.classList.remove('ready'); $('create-reaction-area').style.display = 'none'; }
+      if (allFilled) { 
+        card.classList.add('ready'); 
+        $('create-reaction-area').style.display = 'flex';
+        speakBtn.style.display = 'flex';
+        speakBtn.dataset.phrase = text;
+      } else { 
+        card.classList.remove('ready'); 
+        $('create-reaction-area').style.display = 'none';
+        speakBtn.style.display = 'none';
+      }
     }
   }
 
@@ -850,6 +857,7 @@
       $('create-score').classList.add('score-pop');
       triggerZowa(val);
       $('create-reaction-area').style.display = 'none';
+      $('btn-speak-create').style.display = 'none';
       setTimeout(() => nextTemplate(), 1200);
     };
   });
