@@ -147,6 +147,7 @@
       content: ''; position: absolute; inset: 0;
       background: radial-gradient(ellipse at center, var(--color-zowa-glow) 0%, transparent 70%);
       opacity: 0; transition: opacity 600ms ease;
+      pointer-events: none; /* 【修正】透明なカバーにクリックを貫通させる */
     }
     .phrase-card.showing::before { opacity: 1; }
     .phrase-card:hover { border-color: var(--color-primary-dim); transform: scale(1.01); }
@@ -169,12 +170,16 @@
       padding: var(--space-1) var(--space-3); border-radius: var(--radius-full);
       background: var(--color-surface-offset);
     }
+    
+    /* 音声再生ボタンのスタイル */
     .btn-speak {
       display: flex; align-items: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
       font-size: var(--text-xs); color: var(--color-text-muted);
       border: 1px solid var(--color-border); background: var(--color-surface-offset);
       transition: all var(--transition-ui); flex-shrink: 0;
+      position: relative; /* 【修正】ボタンを重なり順の判定対象にする */
+      z-index: 10;        /* 【修正】確実に最前面に持ってくる */
     }
     .btn-speak:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); }
     .btn-speak.speaking { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); animation: speakPulse 800ms ease-in-out infinite; }
@@ -422,7 +427,7 @@
   </div>
 
   <script>
-  // === ユーティリティ（※ここを一番上に移動しました） ===
+  // === ユーティリティ ===
   const $ = id => document.getElementById(id);
   function shuffle(arr) {
     const a=[...arr];
