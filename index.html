@@ -147,7 +147,7 @@
       content: ''; position: absolute; inset: 0;
       background: radial-gradient(ellipse at center, var(--color-zowa-glow) 0%, transparent 70%);
       opacity: 0; transition: opacity 600ms ease;
-      pointer-events: none; /* 【修正】透明なカバーにクリックを貫通させる */
+      pointer-events: none;
     }
     .phrase-card.showing::before { opacity: 1; }
     .phrase-card:hover { border-color: var(--color-primary-dim); transform: scale(1.01); }
@@ -171,18 +171,24 @@
       background: var(--color-surface-offset);
     }
     
+    /* アクションボタン群のラッパー */
+    .footer-actions { display: flex; gap: var(--space-2); align-items: center; }
+
     /* 音声再生ボタンのスタイル */
-    .btn-speak {
+    .btn-speak, .btn-share {
       display: flex; align-items: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
       font-size: var(--text-xs); color: var(--color-text-muted);
       border: 1px solid var(--color-border); background: var(--color-surface-offset);
       transition: all var(--transition-ui); flex-shrink: 0;
-      position: relative; /* 【修正】ボタンを重なり順の判定対象にする */
-      z-index: 10;        /* 【修正】確実に最前面に持ってくる */
+      position: relative; z-index: 10;
     }
     .btn-speak:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); }
     .btn-speak.speaking { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); animation: speakPulse 800ms ease-in-out infinite; }
+    
+    /* シェアボタンのホバースタイル (Xのブランドカラー風) */
+    .btn-share:hover { color: #d8d5e8; border-color: #d8d5e8; background: rgba(255,255,255,0.1); }
+
     @keyframes speakPulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
 
     /* === 反応エリア === */
@@ -263,7 +269,6 @@
     .preview-text.placeholder { color: var(--color-text-faint); font-weight: 400; }
     .create-actions { display: flex; gap: var(--space-3); flex-shrink: 0; margin-top: var(--space-4); }
 
-    /* プレビューカード用のスピークボタン配置 */
     .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
 
     /* === ぞわっとエフェクト === */
@@ -352,10 +357,16 @@
         <div class="phrase-text" id="phrase-text">タップ</div>
         <div class="phrase-card-footer">
           <div class="phrase-type" id="phrase-type"></div>
-          <button class="btn-speak" id="btn-speak" style="display:none" aria-label="読み上げる">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-            <span>聴く</span>
-          </button>
+          <div class="footer-actions">
+            <button class="btn-speak" id="btn-speak" style="display:none" aria-label="読み上げる">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              <span>聴く</span>
+            </button>
+            <button class="btn-share" id="btn-share-read" style="display:none" aria-label="Xで叫ぶ">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              <span>叫ぶ</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -399,10 +410,16 @@
       <div class="preview-card" id="preview-card">
         <div class="preview-header">
           <p class="preview-label" style="margin:0;">完成フレーズ</p>
-          <button class="btn-speak" id="btn-speak-create" style="display:none" aria-label="読み上げる">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-            <span>聴く</span>
-          </button>
+          <div class="footer-actions">
+            <button class="btn-speak" id="btn-speak-create" style="display:none" aria-label="読み上げる">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              <span>聴く</span>
+            </button>
+            <button class="btn-share" id="btn-share-create" style="display:none" aria-label="Xで叫ぶ">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+              <span>叫ぶ</span>
+            </button>
+          </div>
         </div>
         <div class="preview-text placeholder" id="preview-text">—— 上から選んで完成させよう ——</div>
       </div>
@@ -433,6 +450,13 @@
     const a=[...arr];
     for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
     return a;
+  }
+
+  // === Xシェア機能 ===
+  function shareToX(text) {
+    const tweetText = `【魂の叫び】\n「${text}」\n\n#ズュッル #音列の違和感\n`;
+    const url = 'https://x.com/intent/tweet?text=' + encodeURIComponent(tweetText);
+    window.open(url, '_blank');
   }
 
   // === フレーズデータ ===
@@ -564,36 +588,31 @@
     sound_b:["スュク","ジョヴィ","ブュン","ゾュッ","ペュキ","ニュキャ","ズィッ","グャム","シュポヴ","ヴュク"],
   };
 
-  // === 音声読み上げ（Web Speech API 改善版） ===
+  // === 音声読み上げ ===
   const synth = window.speechSynthesis;
   let jpVoice = null;
-  window._currentUtterance = null; // ガベージコレクションバグ対策
+  window._currentUtterance = null;
 
-  // 日本語の音声を確実に取得する関数
   function loadVoices() {
     const voices = synth.getVoices();
-    // Google日本語音声やブラウザ標準の日本語を優先して探す
     jpVoice = voices.find(v => v.lang === 'ja-JP' || v.name.includes('Google 日本語')) || null;
   }
   
-  // 音声リストが読み込まれたときに再取得する（Chrome等の非同期読み込み対策）
   if (synth && synth.onvoiceschanged !== undefined) {
     synth.onvoiceschanged = loadVoices;
   }
-  loadVoices(); // 初回実行
+  loadVoices();
 
-  // しゃべる処理を一本化
   function speakText(text, btnElement) {
     if (!synth) return;
-    synth.cancel(); // 再生中の音声を停止
+    synth.cancel();
 
     const utter = new SpeechSynthesisUtterance(text);
-    window._currentUtterance = utter; // バグ回避のためグローバルに保持
+    window._currentUtterance = utter;
 
     utter.lang = 'ja-JP';
     if (jpVoice) utter.voice = jpVoice;
     
-    // 気持ち悪さを出すため、少しゆっくり・低めに設定
     utter.rate = 0.75;
     utter.pitch = 0.8;
     utter.volume = 1.0;
@@ -605,24 +624,32 @@
     synth.speak(utter);
   }
 
-  // しゃべるのを強制終了する関数
   function stopSpeak() {
     if (synth) synth.cancel();
     document.querySelectorAll('.btn-speak').forEach(btn => btn.classList.remove('speaking'));
   }
 
-  // 読むモードの音声ボタン
+  // ボタンのイベントリスナー設定
   $('btn-speak').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
     if (text) speakText(text, this);
   });
-
-  // 作るモードの音声ボタン（新規追加）
   $('btn-speak-create').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
     if (text) speakText(text, this);
+  });
+  
+  $('btn-share-read').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const text = this.dataset.phrase;
+    if (text) shareToX(text);
+  });
+  $('btn-share-create').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const text = this.dataset.phrase;
+    if (text) shareToX(text);
   });
 
   // === 状態 ===
@@ -653,11 +680,11 @@
     create: { templateIndex:-1, current:null, selections:{}, score:0 },
   };
 
-  // === スクリーン遷移 ===
   function showScreen(name) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-'+name).classList.add('active');
   }
+  
   $('btn-read').onclick   = () => { showScreen('read');   initRead(); };
   $('btn-create').onclick = () => { showScreen('create'); initCreate(); };
   $('read-back').onclick   = () => { stopSpeak(); showScreen('title'); };
@@ -669,6 +696,7 @@
     r.queue = r.category === 'mix' ? buildMixQueue() : shuffle([...PHRASES[r.category]]);
     $('reaction-area').style.display = 'none';
     $('btn-speak').style.display = 'none';
+    $('btn-share-read').style.display = 'none';
     $('phrase-text').textContent = 'タップ';
     $('phrase-hint').textContent = 'カードをタップしてスタート';
     $('phrase-type').textContent = '';
@@ -687,7 +715,7 @@
   });
 
   $('phrase-card').onclick = (e) => {
-    if (e.target.closest('.btn-speak')) return;
+    if (e.target.closest('.btn-speak') || e.target.closest('.btn-share')) return;
     if (!state.read.awaitingReaction) nextPhrase();
   };
 
@@ -710,8 +738,11 @@
     $('phrase-type').textContent = labels[phrase.type] || '';
 
     const speakBtn = $('btn-speak');
+    const shareBtn = $('btn-share-read');
     speakBtn.style.display = 'flex';
+    shareBtn.style.display = 'flex';
     speakBtn.dataset.phrase = phrase.text;
+    shareBtn.dataset.phrase = phrase.text;
     stopSpeak();
 
     setTimeout(() => {
@@ -755,6 +786,7 @@
     nextTemplate();
     $('create-reaction-area').style.display = 'none';
     $('btn-speak-create').style.display = 'none';
+    $('btn-share-create').style.display = 'none';
   }
 
   function nextTemplate() {
@@ -815,12 +847,14 @@
     const el = $('preview-text');
     const card = $('preview-card');
     const speakBtn = $('btn-speak-create');
+    const shareBtn = $('btn-share-create');
     
     if (Object.keys(c.selections).length === 0) {
       el.textContent = '—— 上から選んで完成させよう ——';
       el.classList.add('placeholder');
       card.classList.remove('ready');
       speakBtn.style.display = 'none';
+      shareBtn.style.display = 'none';
       $('create-reaction-area').style.display = 'none';
     } else {
       el.textContent = text;
@@ -829,11 +863,14 @@
         card.classList.add('ready'); 
         $('create-reaction-area').style.display = 'flex';
         speakBtn.style.display = 'flex';
+        shareBtn.style.display = 'flex';
         speakBtn.dataset.phrase = text;
+        shareBtn.dataset.phrase = text;
       } else { 
         card.classList.remove('ready'); 
         $('create-reaction-area').style.display = 'none';
         speakBtn.style.display = 'none';
+        shareBtn.style.display = 'none';
       }
     }
   }
@@ -863,6 +900,7 @@
       triggerZowa(val);
       $('create-reaction-area').style.display = 'none';
       $('btn-speak-create').style.display = 'none';
+      $('btn-share-create').style.display = 'none';
       setTimeout(() => nextTemplate(), 1200);
     };
   });
