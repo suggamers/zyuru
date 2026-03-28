@@ -164,7 +164,6 @@
     
     .phrase-hint { font-size: var(--text-xs); color: var(--color-text-faint); letter-spacing: 0.06em; }
     
-    /* シチュエーション表示用スタイル */
     .phrase-situation, .preview-situation {
       font-size: var(--text-sm);
       color: var(--color-primary);
@@ -504,7 +503,7 @@
     "命乞いをしながら"
   ];
 
-  // === フレーズデータ（元に戻しました） ===
+  // === フレーズデータ ===
   const PHRASES = {
     single_sounds: [
       {text:"サピーン",type:"single",intensity:2},{text:"ズュッ",type:"single",intensity:3},
@@ -633,8 +632,9 @@
     sound_b:["スュク","ジョヴィ","ブュン","ゾュッ","ペュキ","ニュキャ","ズィッ","グャム","シュポヴ","ヴュク"],
   };
 
-  // === 音声読み上げ（VOICEVOX トーンランダム化） ===
-  let currentAudio = null;
+  // === 音声読み上げ（APIポーリング対応 ＆ トーンランダム化） ===
+  // iOS等での自動再生ブロックを防ぐため、Audioオブジェクトは1つを使い回す
+  let currentAudio = new Audio();
   const SPEAKER_ID = 3; // ずんだもん
 
   async function speakText(text, btnElement) {
@@ -647,22 +647,30 @@
     }
 
     try {
-      // API側のパラメータで声のピッチ（高さ）とスピードをランダム化
-      const pitch = (Math.random() * 0.3 - 0.15).toFixed(2); // -0.15 (低い) 〜 +0.15 (高い)
-      const speed = (Math.random() * 0.4 + 0.8).toFixed(2);  // 0.8 (遅い) 〜 1.2 (速い)
-      const intonation = (Math.random() * 0.5 + 0.5).toFixed(2); // 0.5 (平坦) 〜 1.0 (普通)
+      // ランダムパラメータの生成
+      const pitch = (Math.random() * 0.3 - 0.15).toFixed(2);
+      const speed = (Math.random() * 0.4 + 0.8).toFixed(2);
+      const intonation = (Math.random() * 0.5 + 0.5).toFixed(2);
 
       const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${SPEAKER_ID}&pitchScale=${pitch}&speedScale=${speed}&intonationScale=${intonation}`;
       const res = await fetch(url);
-      const data = await res.json();
+      let data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
 
-      currentAudio = new Audio(data.mp3DownloadUrl);
-      
-      // さらにブラウザの再生機能でも少しだけ再生速度をバグらせる（テープの遅送り・早送りのような効果）
+      // ★追加処理：サーバー側で音声が完成するまで待機（ポーリング）
+      // これにより、1回目のクリックでも確実に音声が再生されるようになります
+      while (!data.isAudioReady) {
+        await new Promise(r => setTimeout(r, 1000)); // 1秒待機
+        const statusRes = await fetch(data.audioStatusUrl);
+        data = await statusRes.json();
+        if (data.isAudioError) throw new Error("音声生成に失敗しました");
+      }
+
+      // 音声の準備ができたらセットして再生
+      currentAudio.src = data.mp3DownloadUrl;
       currentAudio.preservesPitch = false; 
-      currentAudio.playbackRate = 0.85 + Math.random() * 0.3; // 0.85 〜 1.15倍
+      currentAudio.playbackRate = 0.85 + Math.random() * 0.3; // ブラウザ側でも速度を少しバグらせる
       
       currentAudio.onplay = () => {
         if (btnElement) {
@@ -695,14 +703,13 @@
         btnElement.classList.remove('loading', 'speaking');
         btnElement.querySelector('span').textContent = '聴く';
       }
-      alert("通信に失敗しました。無料APIが混み合っている可能性があります。");
+      alert("通信に失敗しました。少し待ってから再度お試しください。");
     }
   }
 
   function stopSpeak() {
     if (currentAudio) {
       currentAudio.pause();
-      currentAudio = null;
     }
     document.querySelectorAll('.btn-speak').forEach(btn => {
       btn.classList.remove('speaking', 'loading');
