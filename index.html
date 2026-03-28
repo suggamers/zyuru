@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="dark">
+<html lang="ja">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
@@ -8,24 +8,32 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* === トークン === */
+    /* === トークン (明るくクリーンなテーマに一新) === */
     :root {
-      --font-display: 'Noto Serif JP', serif;
+      --font-display: 'Noto Serif JP', serif; /* タイトルは明朝体 */
       --font-body: 'Noto Sans JP', sans-serif;
-      --color-bg:             #0c0b12;
-      --color-surface:        #131120;
-      --color-surface-2:      #1a1828;
-      --color-surface-offset: #201e30;
-      --color-border:         #2d2a42;
-      --color-divider:        #252338;
-      --color-text:           #d8d5e8;
-      --color-text-muted:     #7a758f;
-      --color-text-faint:     #3d3a52;
-      --color-primary:        #a78bfa;
-      --color-primary-hover:  #c4b5fd;
-      --color-primary-dim:    #3d2f6e;
-      --color-zowa-glow:      rgba(124,111,224,0.25);
-      --color-zowa-intense:   #e879f9;
+      
+      /* ライトテーマのカラーパレット */
+      --color-bg:             #f8f9fa; /* 優しいオフホワイト背景 */
+      --color-surface:        #ffffff; /* 真っ白なカード */
+      --color-surface-2:      #f1f3f5;
+      --color-surface-offset: #e9ecef;
+      --color-border:         #e2e8f0; /* 薄いグレーの境界線 */
+      --color-divider:        #edf2f7;
+      
+      --color-text:           #2d3748; /* 濃いグレー（真っ黒より目に優しい） */
+      --color-text-muted:     #718096;
+      --color-text-faint:     #a0aec0;
+      
+      /* メインカラー：ミステリアスだけど親しみのあるパープル */
+      --color-primary:        #805ad5; 
+      --color-primary-hover:  #6b46c1;
+      --color-primary-dim:    #faf5ff; /* ほんのり紫の背景 */
+      
+      /* ぞわっとエフェクト用 */
+      --color-zowa-glow:      rgba(128, 90, 213, 0.15);
+      --color-zowa-intense:   #d53f8c; /* ピンク寄りのアクセント */
+      
       --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
       --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
       --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
@@ -33,9 +41,14 @@
       --text-phrase: clamp(1.75rem, 1rem + 3vw, 3rem);
       --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem;
       --space-4: 1rem; --space-6: 1.5rem; --space-8: 2rem;
-      --radius-sm: 0.375rem; --radius-md: 0.75rem;
-      --radius-lg: 1.25rem; --radius-xl: 2rem; --radius-full: 9999px;
-      --transition-ui: 180ms cubic-bezier(0.16,1,0.3,1);
+      --radius-sm: 0.5rem; --radius-md: 0.75rem;
+      --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
+      --transition-ui: 200ms cubic-bezier(0.16,1,0.3,1);
+      
+      /* 浮遊感を出すシャドウ */
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.05), 0 4px 6px rgba(0,0,0,0.03);
     }
 
     /* === ベース === */
@@ -65,7 +78,7 @@
     .title-logo {
       width: min(320px, 90vw);
       color: var(--color-primary);
-      filter: drop-shadow(0 0 24px var(--color-zowa-glow));
+      filter: drop-shadow(0 4px 12px var(--color-zowa-glow));
       animation: float 4s ease-in-out infinite;
     }
     .title-logo svg { width: 100%; height: auto; }
@@ -73,17 +86,20 @@
       0%,100% { transform: translateY(0); }
       50%      { transform: translateY(-6px); }
     }
-    .title-sub { font-size: var(--text-sm); color: var(--color-text-muted); letter-spacing: 0.1em; }
+    .title-sub { font-size: var(--text-sm); color: var(--color-text-muted); letter-spacing: 0.1em; font-weight: 500; }
     .title-desc { display: flex; flex-direction: column; gap: var(--space-2); max-width: 320px; }
     .title-desc p { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.7; }
     .mode-buttons { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; max-width: 320px; }
+    
     .btn-mode {
       display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto;
       gap: var(--space-1) var(--space-3); align-items: center;
       padding: var(--space-4) var(--space-6);
-      background: var(--color-surface); border: 1px solid var(--color-border);
+      background: var(--color-surface); 
+      border: 1px solid var(--color-border);
       border-radius: var(--radius-lg); text-align: left;
-      transition: background var(--transition-ui), border-color var(--transition-ui), transform var(--transition-ui);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-ui);
       position: relative; overflow: hidden;
     }
     .btn-mode::before {
@@ -91,9 +107,13 @@
       background: linear-gradient(135deg, var(--color-primary) 0%, transparent 60%);
       opacity: 0; transition: opacity var(--transition-ui);
     }
-    .btn-mode:hover::before { opacity: 0.06; }
-    .btn-mode:hover { border-color: var(--color-primary); transform: translateY(-2px); }
-    .btn-mode:active { transform: translateY(0); }
+    .btn-mode:hover::before { opacity: 0.05; }
+    .btn-mode:hover { 
+      border-color: var(--color-primary); 
+      transform: translateY(-2px); 
+      box-shadow: var(--shadow-md);
+    }
+    .btn-mode:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
     .mode-icon { grid-row: 1/3; font-size: 1.75rem; line-height: 1; }
     .mode-name { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
     .mode-desc { font-size: var(--text-xs); color: var(--color-text-muted); }
@@ -105,7 +125,8 @@
       color: var(--color-text-faint);
       margin-top: var(--space-6);
     }
-    .credit a { color: inherit; text-decoration: underline; }
+    .credit a { color: inherit; text-decoration: underline; transition: color 0.2s; }
+    .credit a:hover { color: var(--color-primary); }
 
     /* === ゲームヘッダー === */
     .game-header {
@@ -115,40 +136,45 @@
     }
     .btn-back {
       display: flex; align-items: center; justify-content: center;
-      width: 40px; height: 40px; border-radius: var(--radius-md);
-      color: var(--color-text-muted);
-      transition: color var(--transition-ui), background var(--transition-ui);
+      width: 40px; height: 40px; border-radius: var(--radius-full);
+      color: var(--color-text-muted); background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
+      transition: all var(--transition-ui);
       flex-shrink: 0;
     }
-    .btn-back:hover { color: var(--color-text); background: var(--color-surface); }
+    .btn-back:hover { color: var(--color-primary); border-color: var(--color-primary); transform: scale(1.05); }
     .header-center { flex: 1; }
-    .mode-label { font-size: var(--text-xs); color: var(--color-text-muted); letter-spacing: 0.08em; }
+    .mode-label { font-size: var(--text-xs); color: var(--color-text-muted); letter-spacing: 0.08em; font-weight: 700;}
     .score-display { display: flex; align-items: baseline; gap: var(--space-1); flex-shrink: 0; }
-    .score-num { font-size: var(--text-lg); font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums lining-nums; }
-    .score-unit { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .score-num { font-size: var(--text-lg); font-weight: 900; color: var(--color-primary); font-variant-numeric: tabular-nums lining-nums; }
+    .score-unit { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500;}
 
     /* === カテゴリタブ === */
-    .category-tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+    .category-tabs { display: flex; gap: var(--space-2); margin-bottom: var(--space-4); overflow-x: auto; scrollbar-width: none; flex-shrink: 0; padding-bottom: 4px; }
     .category-tabs::-webkit-scrollbar { display: none; }
     .cat-tab {
       flex-shrink: 0; padding: var(--space-2) var(--space-4);
-      border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 500;
+      border-radius: var(--radius-full); font-size: var(--text-xs); font-weight: 600;
       color: var(--color-text-muted); background: var(--color-surface);
       border: 1px solid var(--color-border);
+      box-shadow: var(--shadow-sm);
       transition: all var(--transition-ui); white-space: nowrap;
     }
-    .cat-tab:hover { color: var(--color-text); border-color: var(--color-primary-dim); }
-    .cat-tab.active { color: var(--color-primary); background: var(--color-primary-dim); border-color: var(--color-primary); }
+    .cat-tab:hover { color: var(--color-primary); border-color: var(--color-primary); }
+    .cat-tab.active { color: var(--color-primary); background: var(--color-primary-dim); border-color: var(--color-primary); box-shadow: none; }
 
     /* === フレーズカード === */
     .phrase-stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-4) 0; }
     .phrase-card {
-      width: 100%; min-height: 220px;
-      background: var(--color-surface); border: 1px solid var(--color-border);
+      width: 100%; min-height: 240px;
+      background: var(--color-surface); 
+      border: 1px solid var(--color-border);
       border-radius: var(--radius-xl); padding: var(--space-8) var(--space-6);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       gap: var(--space-4); text-align: center; cursor: pointer;
-      transition: border-color var(--transition-ui), box-shadow var(--transition-ui), transform var(--transition-ui);
+      box-shadow: var(--shadow-lg);
+      transition: all var(--transition-ui);
       position: relative; overflow: hidden;
     }
     .phrase-card::before {
@@ -158,16 +184,16 @@
       pointer-events: none;
     }
     .phrase-card.showing::before { opacity: 1; }
-    .phrase-card:hover { border-color: var(--color-primary-dim); transform: scale(1.01); }
-    .phrase-card:active { transform: scale(0.99); }
-    .phrase-card.zowa-flash { border-color: var(--color-primary); box-shadow: 0 0 32px var(--color-zowa-glow); }
+    .phrase-card:hover { transform: scale(1.02); box-shadow: 0 15px 25px rgba(0,0,0,0.06); }
+    .phrase-card:active { transform: scale(0.98); box-shadow: var(--shadow-md); }
+    .phrase-card.zowa-flash { border-color: var(--color-primary); box-shadow: 0 0 0 4px var(--color-primary-dim); }
     
     .phrase-hint { font-size: var(--text-xs); color: var(--color-text-faint); letter-spacing: 0.06em; }
     
     .phrase-situation, .preview-situation {
       font-size: var(--text-sm);
       color: var(--color-primary);
-      font-weight: bold;
+      font-weight: 700;
       letter-spacing: 0.05em;
       margin-bottom: calc(var(--space-2) * -1);
       display: none;
@@ -175,7 +201,7 @@
 
     .phrase-text {
       font-family: var(--font-display); font-size: var(--text-phrase);
-      font-weight: 700; color: var(--color-text); line-height: 1.4;
+      font-weight: 900; color: var(--color-text); line-height: 1.4;
       word-break: break-all; letter-spacing: 0.02em;
     }
     .phrase-card.entering .phrase-text { animation: phraseEnter 500ms cubic-bezier(0.16,1,0.3,1) forwards; }
@@ -185,9 +211,9 @@
     }
     .phrase-card-footer { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: var(--space-3); }
     .phrase-type {
-      font-size: var(--text-xs); color: var(--color-text-faint);
+      font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 500;
       padding: var(--space-1) var(--space-3); border-radius: var(--radius-full);
-      background: var(--color-surface-offset);
+      background: var(--color-surface-2); border: 1px solid var(--color-border);
     }
     
     .footer-actions { display: flex; gap: var(--space-2); align-items: center; }
@@ -195,107 +221,119 @@
     .btn-speak, .btn-share {
       display: flex; align-items: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
-      font-size: var(--text-xs); color: var(--color-text-muted);
-      border: 1px solid var(--color-border); background: var(--color-surface-offset);
+      font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted);
+      border: 1px solid var(--color-border); background: var(--color-surface);
+      box-shadow: var(--shadow-sm);
       transition: all var(--transition-ui); flex-shrink: 0;
       position: relative; z-index: 10;
     }
-    .btn-speak:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); }
+    .btn-speak:hover, .btn-share:hover { 
+      color: var(--color-primary); border-color: var(--color-primary); 
+      background: var(--color-primary-dim); transform: translateY(-1px);
+    }
     .btn-speak.loading { opacity: 0.6; pointer-events: none; animation: speakPulse 1.5s ease-in-out infinite; }
-    .btn-speak.speaking { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); animation: speakPulse 800ms ease-in-out infinite; }
-    .btn-share:hover { color: #d8d5e8; border-color: #d8d5e8; background: rgba(255,255,255,0.1); }
+    .btn-speak.speaking { color: var(--color-surface); border-color: var(--color-primary); background: var(--color-primary); animation: speakPulse 800ms ease-in-out infinite; }
 
-    @keyframes speakPulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+    @keyframes speakPulse { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
 
     /* === 反応エリア === */
     .reaction-area { display: flex; flex-direction: column; gap: var(--space-3); flex-shrink: 0; animation: fadeUp 300ms ease forwards; }
     @keyframes fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
-    .reaction-label { font-size: var(--text-xs); color: var(--color-text-muted); text-align: center; letter-spacing: 0.06em; }
+    .reaction-label { font-size: var(--text-xs); color: var(--color-text-muted); font-weight: 600; text-align: center; letter-spacing: 0.06em; }
     .reaction-buttons { display: flex; gap: var(--space-3); justify-content: center; }
     .btn-reaction {
       display: flex; flex-direction: column; align-items: center; gap: var(--space-1);
       padding: var(--space-3) var(--space-4);
       background: var(--color-surface); border: 1px solid var(--color-border);
       border-radius: var(--radius-lg); flex: 1; max-width: 100px;
+      box-shadow: var(--shadow-sm);
       transition: all var(--transition-ui);
     }
-    .btn-reaction:hover { border-color: var(--color-primary); background: var(--color-surface-2); transform: translateY(-2px); }
-    .btn-reaction:active { transform: scale(0.95); }
-    .reaction-emoji { font-size: 1.5rem; line-height: 1; }
-    .reaction-text { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .btn-reaction:hover { border-color: var(--color-primary); background: var(--color-primary-dim); transform: translateY(-3px); box-shadow: var(--shadow-md); }
+    .btn-reaction:active { transform: scale(0.95); box-shadow: none; }
+    .reaction-emoji { font-size: 1.75rem; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
+    .reaction-text { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted); }
 
     /* === ネクストエリア === */
     .next-area { display: flex; gap: var(--space-3); margin-top: var(--space-4); flex-shrink: 0; }
     .btn-next {
       flex: 1; padding: var(--space-3) var(--space-4);
-      background: var(--color-primary); color: #0c0b12;
-      border-radius: var(--radius-md); font-weight: 700; font-size: var(--text-sm);
-      transition: background var(--transition-ui), transform var(--transition-ui);
+      background: var(--color-primary); color: #ffffff;
+      border-radius: var(--radius-lg); font-weight: 700; font-size: var(--text-sm);
+      box-shadow: 0 4px 10px rgba(128, 90, 213, 0.3);
+      transition: all var(--transition-ui); border: none;
     }
-    .btn-next:hover { background: var(--color-primary-hover); transform: translateY(-1px); }
-    .btn-next:active { transform: scale(0.98); }
+    .btn-next:hover { background: var(--color-primary-hover); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(128, 90, 213, 0.4); }
+    .btn-next:active { transform: scale(0.98); box-shadow: 0 2px 5px rgba(128, 90, 213, 0.3); }
+    
     .btn-skip, .btn-secondary {
-      padding: var(--space-3) var(--space-4); color: var(--color-text-muted);
-      border: 1px solid var(--color-border); border-radius: var(--radius-md); font-size: var(--text-sm);
+      padding: var(--space-3) var(--space-4); color: var(--color-text-muted); background: var(--color-surface);
+      border: 1px solid var(--color-border); border-radius: var(--radius-lg); font-size: var(--text-sm); font-weight: 600;
+      box-shadow: var(--shadow-sm);
       transition: all var(--transition-ui);
     }
-    .btn-skip:hover, .btn-secondary:hover { color: var(--color-text); border-color: var(--color-primary-dim); }
+    .btn-skip:hover, .btn-secondary:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); }
 
     /* === ストリークバー === */
     .streak-bar {
       display: flex; align-items: center; gap: var(--space-3);
       margin-top: var(--space-4); padding: var(--space-3) var(--space-4);
-      background: var(--color-surface); border-radius: var(--radius-md);
-      border: 1px solid var(--color-divider); flex-shrink: 0;
+      background: var(--color-surface); border-radius: var(--radius-lg);
+      border: 1px solid var(--color-border); box-shadow: var(--shadow-sm); flex-shrink: 0;
     }
-    .streak-label { font-size: var(--text-xs); color: var(--color-text-faint); }
-    .streak-count { font-size: var(--text-lg); font-weight: 700; color: var(--color-primary); font-variant-numeric: tabular-nums; margin-right: auto; }
-    .streak-max { font-size: var(--text-xs); color: var(--color-text-faint); }
+    .streak-label { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted); }
+    .streak-count { font-size: var(--text-lg); font-weight: 900; color: var(--color-primary); font-variant-numeric: tabular-nums; margin-right: auto; }
+    .streak-max { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-faint); }
 
     /* === 作るモード === */
-    .create-stage { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); overflow-y: auto; }
+    .create-stage { flex: 1; display: flex; flex-direction: column; gap: var(--space-4); overflow-y: auto; padding-bottom: var(--space-4); }
     .template-card {
       background: var(--color-surface); border: 1px solid var(--color-border);
       border-radius: var(--radius-xl); padding: var(--space-6); cursor: pointer;
-      transition: border-color var(--transition-ui), transform var(--transition-ui);
+      box-shadow: var(--shadow-md);
+      transition: all var(--transition-ui);
     }
-    .template-card:hover { border-color: var(--color-primary-dim); transform: scale(1.01); }
-    .template-label, .preview-label { font-size: var(--text-xs); color: var(--color-text-faint); letter-spacing: 0.08em; margin-bottom: var(--space-2); }
-    .template-text { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-text); line-height: 1.6; }
-    .slots-area { display: flex; flex-direction: column; gap: var(--space-3); }
+    .template-card:hover { border-color: var(--color-primary); transform: scale(1.02); box-shadow: var(--shadow-lg); }
+    .template-label, .preview-label { font-size: var(--text-xs); font-weight: 700; color: var(--color-text-faint); letter-spacing: 0.08em; margin-bottom: var(--space-2); }
+    .template-text { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 900; color: var(--color-text); line-height: 1.6; }
+    
+    .slots-area { display: flex; flex-direction: column; gap: var(--space-4); }
     .slot-group { display: flex; flex-direction: column; gap: var(--space-2); }
-    .slot-label { font-size: var(--text-xs); color: var(--color-text-muted); }
+    .slot-label { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted); }
     .slot-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
     .slot-chip {
       padding: var(--space-2) var(--space-3); background: var(--color-surface);
       border: 1px solid var(--color-border); border-radius: var(--radius-full);
-      font-size: var(--text-sm); color: var(--color-text-muted); cursor: pointer;
+      font-size: var(--text-sm); font-weight: 600; color: var(--color-text-muted); cursor: pointer;
+      box-shadow: var(--shadow-sm);
       transition: all var(--transition-ui);
     }
-    .slot-chip:hover { color: var(--color-text); border-color: var(--color-primary-dim); }
-    .slot-chip.selected { background: var(--color-primary-dim); border-color: var(--color-primary); color: var(--color-primary); font-weight: 600; }
+    .slot-chip:hover { color: var(--color-primary); border-color: var(--color-primary); transform: translateY(-1px); }
+    .slot-chip.selected { background: var(--color-primary); border-color: var(--color-primary); color: #ffffff; box-shadow: 0 4px 8px rgba(128, 90, 213, 0.3); }
+    
     .preview-card {
-      background: var(--color-surface-2); border: 1px solid var(--color-border);
+      background: var(--color-surface-2); border: 1px dashed var(--color-border);
       border-radius: var(--radius-xl); padding: var(--space-6);
-      transition: border-color var(--transition-ui);
+      transition: all var(--transition-ui);
       position: relative;
     }
-    .preview-card.ready { border-color: var(--color-primary-dim); }
-    .preview-text { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 700; color: var(--color-primary); line-height: 1.6; min-height: 2.4em; }
-    .preview-text.placeholder { color: var(--color-text-faint); font-weight: 400; }
-    .create-actions { display: flex; gap: var(--space-3); flex-shrink: 0; margin-top: var(--space-4); }
+    .preview-card.ready { border-style: solid; border-color: var(--color-primary); background: var(--color-surface); box-shadow: var(--shadow-lg); }
+    .preview-text { font-family: var(--font-display); font-size: var(--text-lg); font-weight: 900; color: var(--color-primary); line-height: 1.6; min-height: 2.4em; }
+    .preview-text.placeholder { color: var(--color-text-faint); font-weight: 500; font-family: var(--font-body); }
+    .create-actions { display: flex; gap: var(--space-3); flex-shrink: 0; margin-top: var(--space-2); }
 
     .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--space-2); }
 
     /* === ぞわっとエフェクト === */
     .zowa-overlay { position: fixed; inset: 0; pointer-events: none; z-index: 100; display: flex; align-items: center; justify-content: center; }
-    .zowa-ripple { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, var(--color-zowa-intense) 0%, var(--color-primary) 40%, transparent 70%); opacity: 0; transform: scale(0); }
+    .zowa-ripple { width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(circle, var(--color-zowa-intense) 0%, var(--color-primary) 40%, transparent 70%); opacity: 0; transform: scale(0); mix-blend-mode: multiply; }
     .zowa-ripple.animate-1 { animation: zowaRipple1 800ms cubic-bezier(0.16,1,0.3,1) forwards; }
     .zowa-ripple.animate-2 { animation: zowaRipple2 1000ms cubic-bezier(0.16,1,0.3,1) forwards; }
     .zowa-ripple.animate-3 { animation: zowaRipple3 1200ms cubic-bezier(0.16,1,0.3,1) forwards; }
-    @keyframes zowaRipple1 { 0% { opacity:.5; transform:scale(.3); } 60% { opacity:.2; transform:scale(3); } 100% { opacity:0; transform:scale(4); } }
-    @keyframes zowaRipple2 { 0% { opacity:.6; transform:scale(.2); } 50% { opacity:.3; transform:scale(4); } 100% { opacity:0; transform:scale(6); } }
-    @keyframes zowaRipple3 { 0% { opacity:.7; transform:scale(.1); } 40% { opacity:.4; transform:scale(5); } 100% { opacity:0; transform:scale(8); } }
+    @keyframes zowaRipple1 { 0% { opacity:.3; transform:scale(.3); } 60% { opacity:.1; transform:scale(3); } 100% { opacity:0; transform:scale(4); } }
+    @keyframes zowaRipple2 { 0% { opacity:.4; transform:scale(.2); } 50% { opacity:.15; transform:scale(4); } 100% { opacity:0; transform:scale(6); } }
+    @keyframes zowaRipple3 { 0% { opacity:.5; transform:scale(.1); } 40% { opacity:.2; transform:scale(5); } 100% { opacity:0; transform:scale(8); } }
+    
     @keyframes screenShake {
       0%   { transform: translate(0,0) rotate(0deg); }
       15%  { transform: translate(-3px,2px) rotate(-0.5deg); }
@@ -312,7 +350,7 @@
 
     @media (max-width: 360px) {
       .reaction-buttons { gap: var(--space-2); }
-      .btn-reaction { padding: var(--space-2) var(--space-3); }
+      .btn-reaction { padding: var(--space-2) var(--space-2); }
     }
   </style>
 </head>
@@ -322,8 +360,8 @@
     <div class="title-logo" aria-label="ぞわっと">
       <svg viewBox="0 0 320 100" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
         <text x="50%" y="78" text-anchor="middle" font-family="'Noto Serif JP',serif" font-weight="900" font-size="72" fill="currentColor" letter-spacing="-2">ズュッル</text>
-        <ellipse cx="160" cy="92" rx="140" ry="6" fill="currentColor" opacity="0.08"/>
-        <ellipse cx="160" cy="92" rx="100" ry="4" fill="currentColor" opacity="0.06"/>
+        <ellipse cx="160" cy="92" rx="140" ry="6" fill="currentColor" opacity="0.15"/>
+        <ellipse cx="160" cy="92" rx="100" ry="4" fill="currentColor" opacity="0.1"/>
       </svg>
     </div>
     <p class="title-sub">音列の違和感を楽しむゲーム</p>
@@ -354,7 +392,7 @@
   <div id="screen-read" class="screen">
     <header class="game-header">
       <button class="btn-back" id="read-back" aria-label="タイトルに戻る">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </button>
       <div class="header-center"><span class="mode-label">読むモード</span></div>
       <div class="score-display">
@@ -381,7 +419,7 @@
           <div class="phrase-type" id="phrase-type"></div>
           <div class="footer-actions">
             <button class="btn-speak" id="btn-speak" style="display:none" aria-label="読み上げる">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
               <span>聴く</span>
             </button>
             <button class="btn-share" id="btn-share-read" style="display:none" aria-label="Xで叫ぶ">
@@ -414,7 +452,7 @@
   <div id="screen-create" class="screen">
     <header class="game-header">
       <button class="btn-back" id="create-back" aria-label="タイトルに戻る">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </button>
       <div class="header-center"><span class="mode-label">作るモード</span></div>
       <div class="score-display">
@@ -434,7 +472,7 @@
           <p class="preview-label" style="margin:0;">完成フレーズ</p>
           <div class="footer-actions">
             <button class="btn-speak" id="btn-speak-create" style="display:none" aria-label="読み上げる">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
               <span>聴く</span>
             </button>
             <button class="btn-share" id="btn-share-create" style="display:none" aria-label="Xで叫ぶ">
@@ -486,7 +524,7 @@
     window.open(url, '_blank');
   }
 
-  // === シチュエーションデータ（珠玉の100選・超絶違和感仕様） ===
+  // === シチュエーションデータ（珠玉の100選） ===
   const SITUATIONS = [
     "厳粛な葬儀の弔辞で", "裁判長による死刑判決の直前に", "謝罪会見で無数のフラッシュを浴びながら", "医者が余命3ヶ月を宣告するトーンで",
     "時限爆弾のタイマーが残り3秒の時に", "恋人からの別れ話への最後の返事として", "選挙演説のクライマックスで", "ニュースキャスターが国家の危機を報じる声で",
@@ -515,7 +553,7 @@
     "お見合いの席で、身上書の代わりに差し出した言葉", "宇宙飛行士がブラックホールに吸い込まれる間際に", "神様が世界を創ったあとに漏らした最初の一言", "これから死ぬ人が、最後に思い出した最も大切なこと"
   ];
 
-  // === 初期フレーズデータ（手書きの最高なフレーズを残す） ===
+  // === 初期手書きフレーズデータ ===
   const PHRASES = {
     single_sounds: [
       {text:"ムベロ",type:"single",intensity:2},{text:"ズュッ",type:"single",intensity:3},
@@ -680,7 +718,6 @@
   ];
 
   function expandPhrases() {
-    // 既存のリストに大量の自動生成フレーズを追加（プッシュ）する
     for(let i=0; i<300; i++) {
       PHRASES.single_sounds.push({ text: genZowaWord(), type: "single", intensity: Math.random()>0.5?3:2 });
     }
@@ -732,23 +769,22 @@
       SLOT_SUGGESTIONS.sound_b.push(genZowaWord());
     }
   }
-  // ページを開いた瞬間にフレーズを大増量
   expandPhrases();
 
-  // === 音声読み上げ（ずんだもんのスタイルランダム化・自動リトライ・エラー非表示） ===
+  // === 音声読み上げ ===
   let currentAudio = new Audio();
+  const ZUNDAMON_STYLES = [3, 1, 7, 5, 22, 38, 75, 76];
   
-  // ★ ずんだもんの持つ8つのスタイルID（感情）
-  const ZUNDAMON_STYLES = [
-    3,  // ノーマル
-    1,  // あまあま
-    7,  // ツンツン
-    5,  // セクシー
-    22, // ささやき
-    38, // ヒソヒソ
-    75, // ヘロヘロ
-    76  // なみだめ
-  ];
+  const synth = window.speechSynthesis;
+  let jpVoice = null;
+  function loadVoices() {
+    const voices = synth.getVoices();
+    jpVoice = voices.find(v => v.lang === 'ja-JP' || v.name.includes('Google 日本語')) || null;
+  }
+  if (synth && synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = loadVoices;
+  }
+  loadVoices();
 
   async function speakText(text, btnElement) {
     if (!text) return;
@@ -761,30 +797,66 @@
       if (spanEl) spanEl.textContent = '生成中...';
     }
 
-    try {
-      // ずんだもんのスタイルを完全ランダム化
-      const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
+    const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
 
+    const fallbackToWebSpeech = () => {
+      if (!synth) {
+        if (btnElement) {
+          btnElement.classList.remove('loading', 'speaking');
+          if (spanEl) spanEl.textContent = '聴く';
+        }
+        return;
+      }
+      const utter = new SpeechSynthesisUtterance(text);
+      window._currentUtterance = utter;
+      utter.lang = 'ja-JP';
+      if (jpVoice) utter.voice = jpVoice;
+      
+      const isHighPitch = Math.random() > 0.5;
+      utter.pitch = isHighPitch ? (1.2 + Math.random() * 0.8) : (0.2 + Math.random() * 0.6);
+      const isFast = Math.random() > 0.5;
+      utter.rate = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3);
+      utter.volume = 1.0;
+
+      utter.onstart = () => {
+        if (btnElement) {
+          btnElement.classList.remove('loading');
+          btnElement.classList.add('speaking');
+          if (spanEl) spanEl.textContent = '再生中';
+        }
+      };
+      utter.onend = () => {
+        if (btnElement) {
+          btnElement.classList.remove('speaking');
+          if (spanEl) spanEl.textContent = '聴く';
+        }
+      };
+      utter.onerror = () => {
+        if (btnElement) {
+          btnElement.classList.remove('loading', 'speaking');
+          if (spanEl) spanEl.textContent = '聴く';
+        }
+      };
+      synth.speak(utter);
+    };
+
+    try {
       const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${currentSpeakerId}`;
       const res = await fetch(url);
       const data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
 
-      // ブラウザ側でのバグトーン付与（テープの伸びたような遅さ〜早口）
       currentAudio.preservesPitch = false;
-      if ('webkitPreservesPitch' in currentAudio) {
-        currentAudio.webkitPreservesPitch = false;
-      }
-      currentAudio.playbackRate = 0.8 + Math.random() * 0.4; // 0.8倍(低い・遅い) 〜 1.2倍(高い・速い)
+      if ('webkitPreservesPitch' in currentAudio) currentAudio.webkitPreservesPitch = false;
+      currentAudio.playbackRate = 0.8 + Math.random() * 0.4;
       
-      // 自動リトライ関数（最大15回）
       const tryPlay = async (retryCount) => {
         try {
           currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
           currentAudio.load();
           await currentAudio.play();
-          return true; // 再生成功！
+          return true;
         } catch (e) {
           if (retryCount > 0) {
             await new Promise(r => setTimeout(r, 1000));
@@ -797,9 +869,7 @@
 
       const isSuccess = await tryPlay(15);
       
-      if (!isSuccess) {
-         throw new Error("生成タイムアウト");
-      }
+      if (!isSuccess) throw new Error("生成タイムアウト");
 
       currentAudio.onplay = () => {
         if (btnElement) {
@@ -817,29 +887,21 @@
       };
       
       currentAudio.onerror = () => {
-        throw new Error("読み込みエラー");
+        fallbackToWebSpeech();
       };
 
     } catch (err) {
-      // エラー時はアラートを出さず、文字だけ「混雑中...」にしてスッと戻す
-      console.error(err);
-      if (btnElement) {
-        btnElement.classList.remove('loading', 'speaking');
-        if (spanEl) {
-          spanEl.textContent = '混雑中...';
-          setTimeout(() => {
-            if (!btnElement.classList.contains('loading') && !btnElement.classList.contains('speaking')) {
-              spanEl.textContent = '聴く';
-            }
-          }, 2000);
-        }
-      }
+      console.warn("VOICEVOX failed, switching to fallback.", err);
+      fallbackToWebSpeech();
     }
   }
 
   function stopSpeak() {
     if (currentAudio) {
       currentAudio.pause();
+    }
+    if (synth) {
+      synth.cancel();
     }
     document.querySelectorAll('.btn-speak').forEach(btn => {
       btn.classList.remove('speaking', 'loading');
@@ -848,7 +910,7 @@
     });
   }
 
-  // ボタンのイベントリスナー（シチュエーション渡し対応）
+  // ボタンのイベントリスナー
   $('btn-speak').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
@@ -947,7 +1009,6 @@
     const phrase = r.queue.pop();
     r.current = phrase;
     
-    // ランダムなシチュエーションをセット
     r.currentSituation = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
     const sitEl = $('phrase-situation');
     sitEl.textContent = `【状況：${r.currentSituation}】`;
@@ -1027,7 +1088,6 @@
     c.current = templates[c.templateIndex];
     c.selections = {};
     
-    // ランダムなシチュエーションをセット
     c.currentSituation = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
     
     $('template-text').textContent = c.current.template;
