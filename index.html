@@ -364,9 +364,9 @@
         <ellipse cx="160" cy="92" rx="100" ry="4" fill="currentColor" opacity="0.1"/>
       </svg>
     </div>
-    <p class="title-sub">音列の違和感を、楽しむゲーム</p>
+    <p class="title-sub">音列の違和感を楽しむゲーム</p>
     <div class="title-desc">
-      <p>気持ち悪いフレーズを、自信満々に声に出してみよう。</p>
+      <p>気持ち悪いフレーズを自信満々に声に出してみよう。</p>
       <p>首筋から背中にかけての、あの「ぞわっ」を楽しもう。</p>
     </div>
     <div class="mode-buttons">
@@ -408,7 +408,7 @@
       <button class="cat-tab" data-cat="fragments">破片</button>
       <button class="cat-tab" data-cat="manga_sfx">漫画擬音</button>
       <button class="cat-tab" data-cat="niibura">ニーブラ系</button>
-      <button class="cat-tab" data-cat="fake_french">假フランス語</button>
+      <button class="cat-tab" data-cat="fake_french">セシール系</button>
     </div>
     <div class="phrase-stage">
       <div class="phrase-card" id="phrase-card">
@@ -1024,7 +1024,7 @@
     $('phrase-text').textContent = phrase.text;
     $('phrase-hint').textContent = '声に出して読んでみよう';
 
-    const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',fake_french:'假フランス語',mix:'ミックス'};
+    const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',fake_french:'セシール系',mix:'ミックス'};
     $('phrase-type').textContent = labels[phrase.type] || '';
 
     const speakBtn = $('btn-speak');
