@@ -10,7 +10,7 @@
   <style>
     /* === トークン (明るくクリーンなテーマに一新) === */
     :root {
-      --font-display: 'Noto Serif JP', serif;
+      --font-display: 'Noto Serif JP', serif; 
       --font-body: 'Noto Sans JP', sans-serif;
       
       --color-bg:             #f8f9fa;
@@ -26,12 +26,10 @@
       
       --color-primary:        #805ad5; 
       --color-primary-hover:  #6b46c1;
-      --color-primary-dim:    #faf5ff;
+      --color-primary-dim:    #faf5ff; 
       
       --color-zowa-glow:      rgba(128, 90, 213, 0.15);
-      --color-zowa-intense:   #d53f8c;
-      --color-favorite:       #d69e2e;
-      --color-favorite-dim:   #fffff0;
+      --color-zowa-intense:   #d53f8c; 
       
       --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
       --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
@@ -87,18 +85,22 @@
     .title-sub { font-size: var(--text-sm); color: var(--color-text-muted); letter-spacing: 0.1em; font-weight: 500; }
     .title-desc { display: flex; flex-direction: column; gap: var(--space-2); max-width: 320px; }
     .title-desc p { font-size: var(--text-sm); color: var(--color-text-muted); line-height: 1.7; }
+    
     .mode-buttons { display: flex; flex-direction: column; gap: var(--space-3); width: 100%; max-width: 320px; }
     
+    /* 修正：モードボタンの立体感と矢印ナビゲーション */
     .btn-mode {
-      display: grid; grid-template-columns: auto 1fr; grid-template-rows: auto auto;
-      gap: var(--space-1) var(--space-3); align-items: center;
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
       padding: var(--space-4) var(--space-6);
       background: var(--color-surface); 
       border: 1px solid var(--color-border);
       border-radius: var(--radius-lg); text-align: left;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.03); /* デフォルトで少し浮かせる */
       transition: all var(--transition-ui);
       position: relative; overflow: hidden;
+      width: 100%;
     }
     .btn-mode::before {
       content: ''; position: absolute; inset: 0;
@@ -109,13 +111,22 @@
     .btn-mode:hover { 
       border-color: var(--color-primary); 
       transform: translateY(-2px); 
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 6px 12px rgba(128, 90, 213, 0.15); /* ホバー時に影に色をつけてアピール */
     }
     .btn-mode:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
-    .mode-icon { grid-row: 1/3; font-size: 1.75rem; line-height: 1; }
+    .mode-icon { font-size: 2rem; flex-shrink: 0; }
+    .mode-text-wrapper { flex: 1; display: flex; flex-direction: column; gap: var(--space-1); }
     .mode-name { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
     .mode-desc { font-size: var(--text-xs); color: var(--color-text-muted); }
-    .title-note { font-size: var(--text-xs); color: var(--color-text-faint); }
+    .mode-arrow {
+      color: var(--color-primary);
+      opacity: 0.6;
+      transition: transform var(--transition-ui), opacity var(--transition-ui);
+      flex-shrink: 0;
+    }
+    .btn-mode:hover .mode-arrow { transform: translateX(4px); opacity: 1; }
+    
+    .title-note { font-size: var(--text-xs); color: var(--color-text-faint); margin-top: var(--space-2); }
     
     .credit {
       text-align: center;
@@ -163,6 +174,32 @@
       pointer-events: none;
       z-index: 1;
     }
+    /* 修正：スクロールできることを示すヒントアイコン */
+    .scroll-hint {
+      position: absolute;
+      right: 6px;
+      top: calc(50% - 4px);
+      transform: translateY(-50%);
+      color: var(--color-primary);
+      opacity: 0.8;
+      pointer-events: none;
+      z-index: 2;
+      animation: nudgeX 1.5s ease-in-out infinite;
+      background: rgba(255, 255, 255, 0.85);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      box-shadow: 0 0 4px rgba(0,0,0,0.1);
+      transition: opacity 0.3s ease;
+    }
+    @keyframes nudgeX {
+      0%, 100% { transform: translate(0, -50%); }
+      50% { transform: translate(-4px, -50%); }
+    }
+
     .category-tabs { 
       display: flex; gap: var(--space-2); 
       overflow-x: auto; 
@@ -429,16 +466,27 @@
     <div class="mode-buttons">
       <button class="btn-mode" id="btn-read">
         <span class="mode-icon">📖</span>
-        <span class="mode-name">読むモード</span>
-        <span class="mode-desc">用意された音列を楽しむ</span>
+        <div class="mode-text-wrapper">
+          <span class="mode-name">読むモード</span>
+          <span class="mode-desc">用意された音列を楽しむ</span>
+        </div>
+        <span class="mode-arrow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
       </button>
       <button class="btn-mode" id="btn-create">
         <span class="mode-icon">✏️</span>
-        <span class="mode-name">作るモード</span>
-        <span class="mode-desc">造語パーツを組み合わせて作る</span>
+        <div class="mode-text-wrapper">
+          <span class="mode-name">作るモード</span>
+          <span class="mode-desc">造語パーツを組み合わせて作る</span>
+        </div>
+        <span class="mode-arrow">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </span>
       </button>
     </div>
     <p class="title-note">声に出しながら楽しもう。</p>
+    
     <div class="credit">
       音声合成: <a href="https://voicevox.hiroshiba.jp/" target="_blank">VOICEVOX (ずんだもん)</a><br>
       API連携: <a href="https://tts.quest/" target="_blank">tts.quest</a>
@@ -458,6 +506,9 @@
     </header>
     
     <div class="category-tabs-wrapper">
+      <div class="scroll-hint">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
       <div class="category-tabs">
         <button class="cat-tab active" data-cat="mix">🎲ミックス</button>
         <button class="cat-tab" data-cat="single_sounds">単発</button>
@@ -470,7 +521,7 @@
         <button class="cat-tab" data-cat="favorites">⭐ 殿堂入り</button>
       </div>
     </div>
-    
+
     <div class="phrase-stage">
       <div class="phrase-card" id="phrase-card">
         <div class="phrase-hint" id="phrase-hint">カードをタップしてスタート</div>
@@ -581,6 +632,20 @@
     for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
     return a;
   }
+
+  // === スクロールヒントの制御 ===
+  document.querySelectorAll('.category-tabs').forEach(container => {
+    const hint = container.parentElement.querySelector('.scroll-hint');
+    if (hint) {
+      container.addEventListener('scroll', () => {
+        if (container.scrollLeft > 10) {
+          hint.style.opacity = '0';
+        } else {
+          hint.style.opacity = '0.8';
+        }
+      });
+    }
+  });
 
   const STORAGE_KEY = "zyurru_favorites";
   
@@ -1205,6 +1270,7 @@
     $('phrase-text').textContent = phrase.text;
     $('phrase-hint').textContent = '声に出して読んでみよう';
 
+    // ⭐️ 表示だけ「セシール系」に変更
     const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',fake_french:'セシール系',mix:'ミックス',created:'自作フレーズ'};
     $('phrase-type').textContent = labels[phrase.type] || '殿堂入り';
 
