@@ -8,31 +8,30 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
   <style>
-    /* === トークン (明るくクリーンなテーマに一新) === */
+    /* === トークン (明るくクリーンなテーマ) === */
     :root {
-      --font-display: 'Noto Serif JP', serif; /* タイトルは明朝体 */
+      --font-display: 'Noto Serif JP', serif;
       --font-body: 'Noto Sans JP', sans-serif;
       
-      /* ライトテーマのカラーパレット */
-      --color-bg:             #f8f9fa; /* 優しいオフホワイト背景 */
-      --color-surface:        #ffffff; /* 真っ白なカード */
+      --color-bg:             #f8f9fa;
+      --color-surface:        #ffffff;
       --color-surface-2:      #f1f3f5;
       --color-surface-offset: #e9ecef;
-      --color-border:         #e2e8f0; /* 薄いグレーの境界線 */
+      --color-border:         #e2e8f0;
       --color-divider:        #edf2f7;
       
-      --color-text:           #2d3748; /* 濃いグレー（真っ黒より目に優しい） */
+      --color-text:           #2d3748;
       --color-text-muted:     #718096;
       --color-text-faint:     #a0aec0;
       
-      /* メインカラー：ミステリアスだけど親しみのあるパープル */
       --color-primary:        #805ad5; 
       --color-primary-hover:  #6b46c1;
-      --color-primary-dim:    #faf5ff; /* ほんのり紫の背景 */
+      --color-primary-dim:    #faf5ff;
       
-      /* ぞわっとエフェクト用 */
       --color-zowa-glow:      rgba(128, 90, 213, 0.15);
-      --color-zowa-intense:   #d53f8c; /* ピンク寄りのアクセント */
+      --color-zowa-intense:   #d53f8c;
+      --color-favorite:       #d69e2e;
+      --color-favorite-dim:   #fffff0;
       
       --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
       --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
@@ -45,7 +44,6 @@
       --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
       --transition-ui: 200ms cubic-bezier(0.16,1,0.3,1);
       
-      /* 浮遊感を出すシャドウ */
       --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
       --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
       --shadow-lg: 0 10px 15px rgba(0,0,0,0.05), 0 4px 6px rgba(0,0,0,0.03);
@@ -108,11 +106,7 @@
       opacity: 0; transition: opacity var(--transition-ui);
     }
     .btn-mode:hover::before { opacity: 0.05; }
-    .btn-mode:hover { 
-      border-color: var(--color-primary); 
-      transform: translateY(-2px); 
-      box-shadow: var(--shadow-md);
-    }
+    .btn-mode:hover { border-color: var(--color-primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
     .btn-mode:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
     .mode-icon { grid-row: 1/3; font-size: 1.75rem; line-height: 1; }
     .mode-name { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
@@ -163,6 +157,8 @@
     }
     .cat-tab:hover { color: var(--color-primary); border-color: var(--color-primary); }
     .cat-tab.active { color: var(--color-primary); background: var(--color-primary-dim); border-color: var(--color-primary); box-shadow: none; }
+    
+    .cat-tab[data-cat="favorites"].active { color: var(--color-favorite); background: var(--color-favorite-dim); border-color: var(--color-favorite); }
 
     /* === フレーズカード === */
     .phrase-stage { flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-4) 0; }
@@ -216,9 +212,9 @@
       background: var(--color-surface-2); border: 1px solid var(--color-border);
     }
     
-    .footer-actions { display: flex; gap: var(--space-2); align-items: center; }
+    .footer-actions { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; justify-content: flex-end;}
 
-    .btn-speak, .btn-share {
+    .btn-speak, .btn-share, .btn-favorite {
       display: flex; align-items: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
       font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted);
@@ -233,6 +229,10 @@
     }
     .btn-speak.loading { opacity: 0.6; pointer-events: none; animation: speakPulse 1.5s ease-in-out infinite; }
     .btn-speak.speaking { color: var(--color-surface); border-color: var(--color-primary); background: var(--color-primary); animation: speakPulse 800ms ease-in-out infinite; }
+
+    .btn-favorite:hover { color: var(--color-favorite); border-color: var(--color-favorite); background: var(--color-favorite-dim); transform: translateY(-1px); }
+    .btn-favorite.active { color: var(--color-favorite); border-color: var(--color-favorite); background: var(--color-favorite-dim); }
+    .btn-favorite.active svg { fill: currentColor; }
 
     @keyframes speakPulse { 0%,100% { opacity:1; } 50% { opacity:0.7; } }
 
@@ -409,6 +409,7 @@
       <button class="cat-tab" data-cat="manga_sfx">漫画擬音</button>
       <button class="cat-tab" data-cat="niibura">ニーブラ系</button>
       <button class="cat-tab" data-cat="fake_french">セシール系</button>
+      <button class="cat-tab" data-cat="favorites">⭐ 殿堂入り</button>
     </div>
     <div class="phrase-stage">
       <div class="phrase-card" id="phrase-card">
@@ -418,6 +419,10 @@
         <div class="phrase-card-footer">
           <div class="phrase-type" id="phrase-type"></div>
           <div class="footer-actions">
+            <button class="btn-favorite" id="btn-fav-read" style="display:none" aria-label="お気に入り">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>保存</span>
+            </button>
             <button class="btn-speak" id="btn-speak" style="display:none" aria-label="読み上げる">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
               <span>聴く</span>
@@ -471,6 +476,10 @@
         <div class="preview-header">
           <p class="preview-label" style="margin:0;">完成フレーズ</p>
           <div class="footer-actions">
+            <button class="btn-favorite" id="btn-fav-create" style="display:none" aria-label="お気に入り">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>保存</span>
+            </button>
             <button class="btn-speak" id="btn-speak-create" style="display:none" aria-label="読み上げる">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
               <span>聴く</span>
@@ -484,7 +493,6 @@
         <div class="preview-situation" id="preview-situation"></div>
         <div class="preview-text placeholder" id="preview-text">—— 上から選んで完成させよう ——</div>
       </div>
-      
     </div>
     <div class="reaction-area" id="create-reaction-area" style="display:none">
       <p class="reaction-label">言ってみてどうだった？</p>
@@ -512,6 +520,60 @@
     for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
     return a;
   }
+
+  // === ローカル保存（お気に入り）機能 ===
+  const STORAGE_KEY = "zyurru_favorites";
+  
+  function getFavorites() {
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function saveFavorites(favs) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(favs));
+    } catch(e) {
+      console.warn("Storage error", e);
+    }
+  }
+
+  function toggleFavorite(phraseObj, situationStr) {
+    let favs = getFavorites();
+    const idx = favs.findIndex(f => f.text === phraseObj.text && f.situation === situationStr);
+    let isAdded = false;
+    
+    if (idx >= 0) {
+      // 既に保存されていれば削除
+      favs.splice(idx, 1);
+    } else {
+      // なければ追加
+      favs.push({
+        text: phraseObj.text,
+        type: phraseObj.type || 'created',
+        intensity: phraseObj.intensity || 2,
+        situation: situationStr
+      });
+      isAdded = true;
+    }
+    saveFavorites(favs);
+    return isAdded;
+  }
+
+  function isFavorite(text, situationStr) {
+    return getFavorites().some(f => f.text === text && f.situation === situationStr);
+  }
+
+  // お気に入りボタンのUI更新
+  function updateFavUI(btn, text, situationStr) {
+    if (!btn || !text) return;
+    const active = isFavorite(text, situationStr);
+    btn.classList.toggle('active', active);
+    btn.querySelector('span').textContent = active ? '保存済' : '保存';
+  }
+
 
   // === Xシェア機能 ===
   function shareToX(text, situation) {
@@ -935,6 +997,23 @@
     if (text) shareToX(text, sit);
   });
 
+  $('btn-fav-read').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const r = state.read;
+    if (!r.current) return;
+    toggleFavorite(r.current, r.currentSituation);
+    updateFavUI(this, r.current.text, r.currentSituation);
+  });
+  
+  $('btn-fav-create').addEventListener('click', function(e) {
+    e.stopPropagation();
+    const c = state.create;
+    if (!c.current || Object.keys(c.selections).length !== c.current.slots.length) return;
+    const text = $('preview-text').textContent;
+    toggleFavorite({text: text, type: 'created', intensity: 2}, c.currentSituation);
+    updateFavUI(this, text, c.currentSituation);
+  });
+
   // === 状態 ===
   const MIX_CATS = ['single_sounds','repeated_sounds','sound_phrases','fragments','manga_sfx','niibura','fake_french'];
 
@@ -968,18 +1047,32 @@
     document.getElementById('screen-'+name).classList.add('active');
   }
   
-  $('btn-read').onclick   = () => { showScreen('read');   initRead(); };
+  $('btn-read').onclick   = () => { showScreen('read');   initRead(true); };
   $('btn-create').onclick = () => { showScreen('create'); initCreate(); };
   $('read-back').onclick   = () => { stopSpeak(); showScreen('title'); };
   $('create-back').onclick = () => { stopSpeak(); showScreen('title'); };
 
   // === 読むモード ===
-  function initRead() {
+  function initRead(rebuild = true) {
     const r = state.read;
-    r.queue = r.category === 'mix' ? buildMixQueue() : shuffle([...PHRASES[r.category]]);
+    if (rebuild) {
+      if (r.category === 'favorites') {
+        r.queue = shuffle(getFavorites());
+        if(r.queue.length === 0) {
+          // alert("まだ保存されたフレーズがありません。");
+          r.category = 'mix';
+          document.querySelectorAll('.cat-tab').forEach(t => t.classList.toggle('active', t.dataset.cat === 'mix'));
+          r.queue = buildMixQueue();
+        }
+      } else {
+        r.queue = r.category === 'mix' ? buildMixQueue() : shuffle([...PHRASES[r.category]]);
+      }
+    }
+    
     $('reaction-area').style.display = 'none';
     $('btn-speak').style.display = 'none';
     $('btn-share-read').style.display = 'none';
+    $('btn-fav-read').style.display = 'none';
     $('phrase-situation').style.display = 'none';
     $('phrase-text').textContent = 'タップ';
     $('phrase-hint').textContent = 'カードをタップしてスタート';
@@ -993,23 +1086,57 @@
       document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
       state.read.category = tab.dataset.cat;
-      state.read.queue = shuffle([...PHRASES[tab.dataset.cat]]);
-      initRead();
+      
+      if (state.read.category === 'favorites') {
+         const favs = getFavorites();
+         if (favs.length === 0) {
+           alert("まだ殿堂入りのフレーズがありません！\n気に入ったフレーズの「保存」ボタンを押してください。");
+           // フォールバック
+           document.querySelectorAll('.cat-tab').forEach(t => {
+             if(t.dataset.cat === 'mix') t.classList.add('active');
+             else t.classList.remove('active');
+           });
+           state.read.category = 'mix';
+           state.read.queue = buildMixQueue();
+         } else {
+           state.read.queue = shuffle([...favs]); 
+         }
+      } else if (state.read.category === 'mix') {
+         state.read.queue = buildMixQueue();
+      } else {
+         state.read.queue = shuffle([...PHRASES[tab.dataset.cat]]);
+      }
+      initRead(false);
     };
   });
 
   $('phrase-card').onclick = (e) => {
-    if (e.target.closest('.btn-speak') || e.target.closest('.btn-share')) return;
+    if (e.target.closest('.btn-speak') || e.target.closest('.btn-share') || e.target.closest('.btn-favorite')) return;
     if (!state.read.awaitingReaction) nextPhrase();
   };
 
   function nextPhrase() {
     const r = state.read;
-    if (r.queue.length === 0) r.queue = r.category === 'mix' ? buildMixQueue() : shuffle([...PHRASES[r.category]]);
+    if (r.queue.length === 0) {
+       if (r.category === 'favorites') {
+          r.queue = shuffle(getFavorites());
+          if (r.queue.length === 0) {
+             r.category = 'mix';
+             r.queue = buildMixQueue();
+             document.querySelectorAll('.cat-tab').forEach(t => {
+               if(t.dataset.cat === 'mix') t.classList.add('active');
+               else t.classList.remove('active');
+             });
+          }
+       } else {
+          r.queue = r.category === 'mix' ? buildMixQueue() : shuffle([...PHRASES[r.category]]);
+       }
+    }
     const phrase = r.queue.pop();
     r.current = phrase;
     
-    r.currentSituation = SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
+    // お気に入りの場合は保存時のシチュエーションを復元、それ以外はランダム
+    r.currentSituation = phrase.situation || SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
     const sitEl = $('phrase-situation');
     sitEl.textContent = `【状況：${r.currentSituation}】`;
     sitEl.style.display = 'block';
@@ -1024,17 +1151,23 @@
     $('phrase-text').textContent = phrase.text;
     $('phrase-hint').textContent = '声に出して読んでみよう';
 
-    const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',fake_french:'セシール系',mix:'ミックス'};
-    $('phrase-type').textContent = labels[phrase.type] || '';
+    const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',fake_french:'セシール系',mix:'ミックス',created:'自作フレーズ'};
+    $('phrase-type').textContent = labels[phrase.type] || '殿堂入り';
 
     const speakBtn = $('btn-speak');
     const shareBtn = $('btn-share-read');
+    const favBtn = $('btn-fav-read');
+    
     speakBtn.style.display = 'flex';
     shareBtn.style.display = 'flex';
-    speakBtn.dataset.phrase = phrase.text;
+    favBtn.style.display = 'flex';
     
+    speakBtn.dataset.phrase = phrase.text;
     shareBtn.dataset.phrase = phrase.text;
     shareBtn.dataset.sit = r.currentSituation;
+    
+    updateFavUI(favBtn, phrase.text, r.currentSituation);
+    
     stopSpeak();
 
     setTimeout(() => {
@@ -1079,6 +1212,7 @@
     $('create-reaction-area').style.display = 'none';
     $('btn-speak-create').style.display = 'none';
     $('btn-share-create').style.display = 'none';
+    $('btn-fav-create').style.display = 'none';
   }
 
   function nextTemplate() {
@@ -1143,6 +1277,7 @@
     const card = $('preview-card');
     const speakBtn = $('btn-speak-create');
     const shareBtn = $('btn-share-create');
+    const favBtn = $('btn-fav-create');
     const sitEl = $('preview-situation');
     
     if (Object.keys(c.selections).length === 0) {
@@ -1151,6 +1286,7 @@
       card.classList.remove('ready');
       speakBtn.style.display = 'none';
       shareBtn.style.display = 'none';
+      favBtn.style.display = 'none';
       sitEl.style.display = 'none';
       $('create-reaction-area').style.display = 'none';
     } else {
@@ -1165,15 +1301,21 @@
         $('create-reaction-area').style.display = 'flex';
         speakBtn.style.display = 'flex';
         shareBtn.style.display = 'flex';
+        favBtn.style.display = 'flex';
+        
         speakBtn.dataset.phrase = text;
         shareBtn.dataset.phrase = text;
         shareBtn.dataset.sit = c.currentSituation;
+        
+        updateFavUI(favBtn, text, c.currentSituation);
+        
       } else { 
         card.classList.remove('ready'); 
         sitEl.style.display = 'none';
         $('create-reaction-area').style.display = 'none';
         speakBtn.style.display = 'none';
         shareBtn.style.display = 'none';
+        favBtn.style.display = 'none';
       }
     }
   }
@@ -1204,12 +1346,12 @@
       $('create-reaction-area').style.display = 'none';
       $('btn-speak-create').style.display = 'none';
       $('btn-share-create').style.display = 'none';
+      $('btn-fav-create').style.display = 'none';
       $('preview-situation').style.display = 'none';
       setTimeout(() => nextTemplate(), 1200);
     };
   });
 
-  // === ぞわっとエフェクト ===
   function triggerZowa(intensity) {
     const ripple = $('zowa-ripple');
     ripple.classList.remove('animate-1','animate-2','animate-3');
