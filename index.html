@@ -12,20 +12,25 @@
     :root {
       --font-display: 'Noto Serif JP', serif;
       --font-body: 'Noto Sans JP', sans-serif;
+      
       --color-bg:             #f8f9fa;
       --color-surface:        #ffffff;
       --color-surface-2:      #f1f3f5;
       --color-surface-offset: #e9ecef;
       --color-border:         #e2e8f0;
       --color-divider:        #edf2f7;
+      
       --color-text:           #2d3748;
       --color-text-muted:     #718096;
       --color-text-faint:     #a0aec0;
+      
       --color-primary:        #805ad5; 
       --color-primary-hover:  #6b46c1;
       --color-primary-dim:    #faf5ff;
+      
       --color-zowa-glow:      rgba(128, 90, 213, 0.15);
       --color-zowa-intense:   #d53f8c;
+      
       --text-xs:   clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
       --text-sm:   clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
       --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
@@ -36,6 +41,7 @@
       --radius-sm: 0.5rem; --radius-md: 0.75rem;
       --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
       --transition-ui: 200ms cubic-bezier(0.16,1,0.3,1);
+      
       --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
       --shadow-md: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.03);
       --shadow-lg: 0 10px 15px rgba(0,0,0,0.05), 0 4px 6px rgba(0,0,0,0.03);
@@ -98,7 +104,11 @@
       opacity: 0; transition: opacity var(--transition-ui);
     }
     .btn-mode:hover::before { opacity: 0.05; }
-    .btn-mode:hover { border-color: var(--color-primary); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+    .btn-mode:hover { 
+      border-color: var(--color-primary); 
+      transform: translateY(-2px); 
+      box-shadow: var(--shadow-md);
+    }
     .btn-mode:active { transform: translateY(0); box-shadow: var(--shadow-sm); }
     .mode-icon { grid-row: 1/3; font-size: 1.75rem; line-height: 1; }
     .mode-name { font-size: var(--text-base); font-weight: 700; color: var(--color-text); }
@@ -368,6 +378,7 @@
       </button>
     </div>
     <p class="title-note">声に出しながら楽しもう。</p>
+    
     <div class="credit">
       音声合成: <a href="https://voicevox.hiroshiba.jp/" target="_blank">VOICEVOX (ずんだもん)</a><br>
       API連携: <a href="https://tts.quest/" target="_blank">tts.quest</a>
@@ -393,7 +404,7 @@
       <button class="cat-tab" data-cat="fragments">破片</button>
       <button class="cat-tab" data-cat="manga_sfx">漫画擬音</button>
       <button class="cat-tab" data-cat="niibura">ニーブラ系</button>
-      <button class="cat-tab" data-cat="cecile_sounds">セシール系</button>
+      <button class="cat-tab" data-cat="fake_french">假フランス語</button>
     </div>
     <div class="phrase-stage">
       <div class="phrase-card" id="phrase-card">
@@ -469,6 +480,7 @@
         <div class="preview-situation" id="preview-situation"></div>
         <div class="preview-text placeholder" id="preview-text">—— 上から選んで完成させよう ——</div>
       </div>
+      
     </div>
     <div class="reaction-area" id="create-reaction-area" style="display:none">
       <p class="reaction-label">言ってみてどうだった？</p>
@@ -484,9 +496,12 @@
     </div>
   </div>
 
-  <div class="zowa-overlay" aria-hidden="true"><div class="zowa-ripple" id="zowa-ripple"></div></div>
+  <div class="zowa-overlay" aria-hidden="true">
+    <div class="zowa-ripple" id="zowa-ripple"></div>
+  </div>
 
   <script>
+  // === ユーティリティ ===
   const $ = id => document.getElementById(id);
   function shuffle(arr) {
     const a=[...arr];
@@ -494,6 +509,7 @@
     return a;
   }
 
+  // === Xシェア機能 ===
   function shareToX(text, situation) {
     let tweetText = `【魂の叫び】\n`;
     if (situation) {
@@ -504,6 +520,7 @@
     window.open(url, '_blank');
   }
 
+  // === シチュエーションデータ（珠玉の100選） ===
   const SITUATIONS = [
     "厳粛な葬儀の弔辞で", "裁判長による死刑判決の直前に", "謝罪会見で無数のフラッシュを浴びながら", "医者が余命3ヶ月を宣告するトーンで",
     "時限爆弾のタイマーが残り3秒の時に", "恋人からの別れ話への最後の返事として", "選挙演説のクライマックスで", "ニュースキャスターが国家の危機を報じる声で",
@@ -532,6 +549,7 @@
     "お見合いの席で、身上書の代わりに差し出した言葉", "宇宙飛行士がブラックホールに吸い込まれる間際に", "神様が世界を創ったあとに漏らした最初の一言", "これから死ぬ人が、最後に思い出した最も大切なこと"
   ];
 
+  // === 初期手書きフレーズデータ ===
   const PHRASES = {
     single_sounds: [
       {text:"ムベロ",type:"single",intensity:2},{text:"ズュッ",type:"single",intensity:3},
@@ -539,28 +557,113 @@
       {text:"ズッキャ",type:"single",intensity:2},{text:"ゲュム",type:"single",intensity:3},
       {text:"シュヴァッ",type:"single",intensity:2},{text:"ヌォ",type:"single",intensity:3},
       {text:"ジュワキ",type:"single",intensity:2},{text:"ビュヴ",type:"single",intensity:3},
-      {text:"ズォッ",type:"single",intensity:3},{text:"ピュギャ",type:"single",intensity:3}
+      {text:"ズォッ",type:"single",intensity:3},{text:"ピュギャ",type:"single",intensity:3},
+      {text:"ゲニャ",type:"single",intensity:2},{text:"ヌャッ",type:"single",intensity:3},
+      {text:"スュク",type:"single",intensity:3},{text:"ジョヴィ",type:"single",intensity:2},
+      {text:"ブュン",type:"single",intensity:2},{text:"ゾュッ",type:"single",intensity:3},
+      {text:"ペュキ",type:"single",intensity:3},{text:"ニュキャ",type:"single",intensity:2},
+      {text:"ズィッ",type:"single",intensity:3},{text:"グャム",type:"single",intensity:2},
+      {text:"シュポヴ",type:"single",intensity:3},{text:"ヴュク",type:"single",intensity:3},
+      {text:"ヌェッ",type:"single",intensity:3},
     ],
-    repeated_sounds: [],
-    sound_phrases: [],
-    fragments: [],
-    manga_sfx: [],
-    niibura: [],
-    cecile_sounds: [
-      // 初期の「最高に良かった偽フランス語」の固定フレーズを復活
-      {text:"ブランシュヴォ",type:"cecile_sounds",intensity:3},{text:"ブォルデナール",type:"cecile_sounds",intensity:3},
-      {text:"モンプゥルヴァ",type:"cecile_sounds",intensity:3},{text:"トゥネルボワ",type:"cecile_sounds",intensity:3},
-      {text:"ブルデモントゥ",type:"cecile_sounds",intensity:3},{text:"トゥルシュヴァ",type:"cecile_sounds",intensity:3},
-      {text:"ブランヴォネール",type:"cecile_sounds",intensity:3},{text:"シュルヴァネ",type:"cecile_sounds",intensity:3},
-      {text:"ヴァルネシュ",type:"cecile_sounds",intensity:3},{text:"モントゥルボァ",type:"cecile_sounds",intensity:3},
-      {text:"トゥレモンシュ",type:"cecile_sounds",intensity:3},{text:"ブレモンドゥァ",type:"cecile_sounds",intensity:3},
-      {text:"フェンルボァ",type:"cecile_sounds",intensity:3},{text:"セトゥルバーヌ",type:"cecile_sounds",intensity:3},
-      {text:"フェルモンシュ",type:"cecile_sounds",intensity:3},{text:"フェドランヴァ",type:"cecile_sounds",intensity:3},
-      {text:"フェランシュボ",type:"cecile_sounds",intensity:3},{text:"セトゥモンシュ",type:"cecile_sounds",intensity:3},
-      {text:"ブォルヴァシュ",type:"cecile_sounds",intensity:3},{text:"フェヴランドゥボ",type:"cecile_sounds",intensity:3},
-      {text:"セュルブォネ",type:"cecile_sounds",intensity:3},{text:"ヴォルデュシュ",type:"cecile_sounds",intensity:3},
-      {text:"フェボランシュ",type:"cecile_sounds",intensity:3},{text:"セドゥルヴォァ",type:"cecile_sounds",intensity:3},
-      {text:"ブォヴランシュ",type:"cecile_sounds",intensity:3}
+    repeated_sounds: [
+      {text:"ムベロムベロ",type:"repeat",intensity:3},{text:"ズッキャズッキャ",type:"repeat",intensity:3},
+      {text:"ニュヴァニュヴァ",type:"repeat",intensity:3},{text:"ピャキピャキ",type:"repeat",intensity:2},
+      {text:"ゲュムゲュム",type:"repeat",intensity:3},{text:"ヌォヌォ",type:"repeat",intensity:3},
+      {text:"ジュワキジュワキ",type:"repeat",intensity:2},{text:"ズォッズォッ",type:"repeat",intensity:3},
+      {text:"ピュギャピュギャ",type:"repeat",intensity:3},{text:"ゲニャゲニャ",type:"repeat",intensity:2},
+      {text:"スュクスュク",type:"repeat",intensity:3},{text:"ブュンブュン",type:"repeat",intensity:2},
+      {text:"ヴュクヴュク",type:"repeat",intensity:3},{text:"ゾュッゾュッ",type:"repeat",intensity:3},
+      {text:"グャムグャム",type:"repeat",intensity:3},
+    ],
+    sound_phrases: [
+      {text:"ニュヴァがムベロした",type:"phrase",intensity:3},
+      {text:"ズッキャのヌォ感",type:"phrase",intensity:3},
+      {text:"ピャキッとゲュムる",type:"phrase",intensity:3},
+      {text:"スュクなジュワキ",type:"phrase",intensity:2},
+      {text:"ゾュッとヌャッた瞬間",type:"phrase",intensity:3},
+      {text:"ビュヴいてもヴュクい",type:"phrase",intensity:3},
+      {text:"ペュキのグャム感がすごい",type:"phrase",intensity:3},
+      {text:"シュヴァッてブュンだから",type:"phrase",intensity:3},
+      {text:"ゲニャくてズォッとする",type:"phrase",intensity:3},
+      {text:"ヌォのニュキャ加減",type:"phrase",intensity:2},
+      {text:"ズュッはズュッなんだよ",type:"phrase",intensity:3},
+      {text:"ムベロ的なピュギャさ",type:"phrase",intensity:3},
+      {text:"ゲュムりながらスュクった",type:"phrase",intensity:3},
+      {text:"ヌャッとジョヴィる感じ",type:"phrase",intensity:3},
+      {text:"ズィッなのかヌォなのか",type:"phrase",intensity:2},
+      {text:"ニュヴァってグャムじゃん",type:"phrase",intensity:3},
+      {text:"ブュンのあとのシュポヴ",type:"phrase",intensity:3},
+      {text:"ヴュクくてもゾュッでしょ",type:"phrase",intensity:3},
+      {text:"ピャキがゲニャになった",type:"phrase",intensity:2},
+      {text:"ジュワキ味のズッキャ感",type:"phrase",intensity:3},
+    ],
+    fragments: [
+      {text:"ズュ",type:"fragment",intensity:3},{text:"ヌォ",type:"fragment",intensity:3},
+      {text:"ギュヴ",type:"fragment",intensity:3},{text:"ズィ",type:"fragment",intensity:3},
+      {text:"ニュヴ",type:"fragment",intensity:3},{text:"ヴュ",type:"fragment",intensity:3},
+      {text:"ゲュ",type:"fragment",intensity:3},{text:"スュ",type:"fragment",intensity:3},
+      {text:"ペュ",type:"fragment",intensity:3},{text:"ゾュ",type:"fragment",intensity:3},
+      {text:"ビュヴ",type:"fragment",intensity:3},{text:"ヌャ",type:"fragment",intensity:3},
+      {text:"グャ",type:"fragment",intensity:3},{text:"ヴョ",type:"fragment",intensity:3},
+      {text:"ジュヴ",type:"fragment",intensity:3},
+    ],
+    manga_sfx: [
+      {text:"ズキュウウウウウン",type:"manga_sfx",intensity:3},
+      {text:"ウリィィィィィィ",type:"manga_sfx",intensity:3},
+      {text:"ウリリリリィィッ",type:"manga_sfx",intensity:3},
+      {text:"ズリュッ",type:"manga_sfx",intensity:3},
+      {text:"ドゴォォォン",type:"manga_sfx",intensity:2},
+      {text:"ギュルルルル",type:"manga_sfx",intensity:3},
+      {text:"ズババババ",type:"manga_sfx",intensity:2},
+      {text:"ヌルリ",type:"manga_sfx",intensity:3},
+      {text:"ズドドドドド",type:"manga_sfx",intensity:2},
+      {text:"グギギギギ",type:"manga_sfx",intensity:3},
+      {text:"ズルリュッ",type:"manga_sfx",intensity:3},
+      {text:"ビキキキキ",type:"manga_sfx",intensity:3},
+      {text:"ズキュキュキュン",type:"manga_sfx",intensity:3},
+      {text:"ヌチャッ",type:"manga_sfx",intensity:3},
+      {text:"ギュルンッ",type:"manga_sfx",intensity:3},
+      {text:"ズリズリュ",type:"manga_sfx",intensity:3},
+      {text:"ウォォォラァァ",type:"manga_sfx",intensity:2},
+      {text:"ヌルヌルリッ",type:"manga_sfx",intensity:3},
+      {text:"ズキュンズキュン",type:"manga_sfx",intensity:3},
+      {text:"グジュッ",type:"manga_sfx",intensity:3},
+      {text:"ビキビキビキッ",type:"manga_sfx",intensity:3},
+      {text:"ズドュン",type:"manga_sfx",intensity:3},
+      {text:"ヌポッ",type:"manga_sfx",intensity:3},
+      {text:"ギュウウウウン",type:"manga_sfx",intensity:3},
+      {text:"ズルリュルリュ",type:"manga_sfx",intensity:3},
+    ],
+    niibura: [
+      {text:"ニーブラ",type:"niibura",intensity:2},{text:"ムベロ",type:"niibura",intensity:2},
+      {text:"ダコーン",type:"niibura",intensity:2},{text:"ペニャコ",type:"niibura",intensity:3},
+      {text:"ゾベラ",type:"niibura",intensity:2},{text:"ヌベック",type:"niibura",intensity:3},
+      {text:"チョビル",type:"niibura",intensity:2},{text:"メコナ",type:"niibura",intensity:2},
+      {text:"ブペロ",type:"niibura",intensity:3},{text:"ダニュコ",type:"niibura",intensity:2},
+      {text:"ゴムレ",type:"niibura",intensity:2},{text:"ペロジン",type:"niibura",intensity:3},
+      {text:"ニョベラ",type:"niibura",intensity:3},{text:"ドゥバコ",type:"niibura",intensity:2},
+      {text:"ムゴン",type:"niibura",intensity:2},{text:"ベコナリ",type:"niibura",intensity:2},
+      {text:"ゾニュム",type:"niibura",intensity:3},{text:"チュベロ",type:"niibura",intensity:2},
+      {text:"ペムダ",type:"niibura",intensity:2},{text:"ゴベリン",type:"niibura",intensity:2},
+      {text:"ヌポコ",type:"niibura",intensity:3},{text:"ダメコ",type:"niibura",intensity:2},
+      {text:"ブロニャ",type:"niibura",intensity:3},{text:"メダコン",type:"niibura",intensity:2},
+      {text:"ゾペラ",type:"niibura",intensity:2},
+    ],
+    fake_french: [
+      {text:"ブランシュヴォ",type:"fake_french",intensity:3},{text:"ブォルデナール",type:"fake_french",intensity:3},
+      {text:"モンプゥルヴァ",type:"fake_french",intensity:3},{text:"トゥネルボワ",type:"fake_french",intensity:3},
+      {text:"ブルデモントゥ",type:"fake_french",intensity:3},{text:"トゥルシュヴァ",type:"fake_french",intensity:3},
+      {text:"ブランヴォネール",type:"fake_french",intensity:3},{text:"シュルヴァネ",type:"fake_french",intensity:3},
+      {text:"ヴァルネシュ",type:"fake_french",intensity:3},{text:"モントゥルボァ",type:"fake_french",intensity:3},
+      {text:"トゥレモンシュ",type:"fake_french",intensity:3},{text:"ブレモンドゥァ",type:"fake_french",intensity:3},
+      {text:"フェンルボァ",type:"fake_french",intensity:3},{text:"セトゥルバーヌ",type:"fake_french",intensity:3},
+      {text:"フェルモンシュ",type:"fake_french",intensity:3},{text:"フェドランヴァ",type:"fake_french",intensity:3},
+      {text:"フェランシュボ",type:"fake_french",intensity:3},{text:"セトゥモンシュ",type:"fake_french",intensity:3},
+      {text:"ブォルヴァシュ",type:"fake_french",intensity:3},{text:"フェヴランドゥボ",type:"fake_french",intensity:3},
+      {text:"セュルブォネ",type:"fake_french",intensity:3},{text:"ヴォルデュシュ",type:"fake_french",intensity:3},
+      {text:"フェボランシュ",type:"fake_french",intensity:3},{text:"セドゥルヴォァ",type:"fake_french",intensity:3},
+      {text:"ブォヴランシュ",type:"fake_french",intensity:3},
     ],
     templates: [
       {template:"___っと___する",slots:["sound_a","sound_b"]},
@@ -571,8 +674,12 @@
     ],
   };
 
-  const SLOT_SUGGESTIONS = { sound_a:[], sound_b:[] };
+  const SLOT_SUGGESTIONS = {
+    sound_a:["ムベロ","ズッキャ","ニュヴァ","ピャキ","ゲュム","ヌォ","ジュワキ","ズォッ","ピュギャ","ゲニャ"],
+    sound_b:["スュク","ジョヴィ","ブュン","ゾュッ","ペュキ","ニュキャ","ズィッ","グャム","シュポヴ","ヴュク"],
+  };
 
+  // === フレーズ無限生成エンジン ===
   const zowaParts = [
     "ズュ","ヌォ","ギュ","ヴ","ズィ","ニュ","ゲュ","スュ","ペュ","ゾュ",
     "ヌャ","グャ","ヴョ","ヂュ","グェ","ピェ","ヂョ","ピョ","ツァ","ヂェ",
@@ -607,20 +714,20 @@
   ];
 
   function expandPhrases() {
-    for(let i=0; i<200; i++) {
+    for(let i=0; i<300; i++) {
       PHRASES.single_sounds.push({ text: genZowaWord(), type: "single", intensity: Math.random()>0.5?3:2 });
     }
     for(let i=0; i<100; i++) {
       let w = genZowaWord();
       PHRASES.repeated_sounds.push({ text: w+w, type: "repeat", intensity: 3 });
     }
-    for(let i=0; i<300; i++) {
+    for(let i=0; i<400; i++) {
       let tpl = phraseTemplates[Math.floor(Math.random() * phraseTemplates.length)];
       let txt = tpl.replace(/\{A\}/g, genZowaWord()).replace(/\{B\}/g, genZowaWord());
       PHRASES.sound_phrases.push({ text: txt, type: "phrase", intensity: 3 });
     }
     
-    const mH = ["ズ","ギュ","ド","バ","グ","ビ","ヌ","ム","ゴ","ベ","ゲ","プ","ギャ","ズキュ"];
+    const mH = ["ズ","ギュ","ド","バ","グ","ビ","ヌ","ム","ゴ","ベ","ゲ","プ","ギャ","ズキュ","ウリ"];
     const mM = ["キュ","ル","バ","ド","ギ","リュ","キ","チャ","リ","ジュ","プ","ポ","ァ","ィ","ゥ","ェ","ォ"];
     const mT = ["ン","ッ","ー"];
     for(let i=0; i<100; i++) {
@@ -637,13 +744,12 @@
       PHRASES.niibura.push({ text: t, type: "niibura", intensity: 2 });
     }
     
-    // ⭐️ セシール系（旧：偽フランス語）のロジック復活＆増量
     const fH = ["ブラン","ブォル","モン","トゥ","ブル","シュル","ヴァル","フェン","セトゥ","フェ","ジュ","ル"];
     const fM = ["シュ","デ","プゥル","ネル","デモン","ル","ヴォ","ネ","ドラン","ラン","ルデュ","ヴァン"];
     const fT = ["ヴォ","ナール","ヴァ","ボワ","トゥ","ネール","ボァ","シュ","ドゥァ","バーヌ","ワーズ","グレ","デュル"];
-    for(let i=0; i<150; i++) {
+    for(let i=0; i<100; i++) {
       let t = fH[Math.floor(Math.random()*fH.length)] + fM[Math.floor(Math.random()*fM.length)] + fT[Math.floor(Math.random()*fT.length)];
-      PHRASES.cecile_sounds.push({ text: t, type: "cecile_sounds", intensity: 3 });
+      PHRASES.fake_french.push({ text: t, type: "fake_french", intensity: 3 });
     }
     
     const fragParts = [...zowaParts, "ッ", "ー", "ン"];
@@ -661,10 +767,9 @@
   }
   expandPhrases();
 
-  // === 音声読み上げ（強制リセット安全装置付き） ===
+  // === 音声読み上げ ===
   let currentAudio = new Audio();
   const ZUNDAMON_STYLES = [3, 1, 7, 5, 22, 38, 75, 76];
-  let globalWatchdog = null; 
   
   const synth = window.speechSynthesis;
   let jpVoice = null;
@@ -677,29 +782,9 @@
   }
   loadVoices();
 
-  function forceResetUI(btnElement, spanEl) {
-    if (btnElement) {
-      btnElement.classList.remove('loading', 'speaking');
-      if (spanEl) {
-        spanEl.textContent = '混雑中...';
-        setTimeout(() => {
-          if (!btnElement.classList.contains('loading') && !btnElement.classList.contains('speaking')) {
-            spanEl.textContent = '聴く';
-          }
-        }, 1500);
-      }
-    }
-  }
-
   async function speakText(text, btnElement) {
     if (!text) return;
     stopSpeak();
-
-    if (synth) {
-      let dummy = new SpeechSynthesisUtterance('');
-      dummy.volume = 0;
-      synth.speak(dummy);
-    }
 
     let spanEl = null;
     if (btnElement) {
@@ -708,17 +793,14 @@
       if (spanEl) spanEl.textContent = '生成中...';
     }
 
-    clearTimeout(globalWatchdog);
-    globalWatchdog = setTimeout(() => {
-      forceResetUI(btnElement, spanEl);
-    }, 15000);
-
     const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
 
     const fallbackToWebSpeech = () => {
       if (!synth) {
-        clearTimeout(globalWatchdog);
-        forceResetUI(btnElement, spanEl);
+        if (btnElement) {
+          btnElement.classList.remove('loading', 'speaking');
+          if (spanEl) spanEl.textContent = '聴く';
+        }
         return;
       }
       const utter = new SpeechSynthesisUtterance(text);
@@ -732,15 +814,7 @@
       utter.rate = isFast ? (1.1 + Math.random() * 0.4) : (0.5 + Math.random() * 0.3);
       utter.volume = 1.0;
 
-      let fbCheck = setTimeout(() => {
-        if (btnElement && !btnElement.classList.contains('speaking')) {
-           clearTimeout(globalWatchdog);
-           forceResetUI(btnElement, spanEl);
-        }
-      }, 1500);
-
       utter.onstart = () => {
-        clearTimeout(fbCheck);
         if (btnElement) {
           btnElement.classList.remove('loading');
           btnElement.classList.add('speaking');
@@ -748,16 +822,16 @@
         }
       };
       utter.onend = () => {
-        clearTimeout(globalWatchdog);
         if (btnElement) {
           btnElement.classList.remove('speaking');
           if (spanEl) spanEl.textContent = '聴く';
         }
       };
       utter.onerror = () => {
-        clearTimeout(globalWatchdog);
-        clearTimeout(fbCheck);
-        forceResetUI(btnElement, spanEl);
+        if (btnElement) {
+          btnElement.classList.remove('loading', 'speaking');
+          if (spanEl) spanEl.textContent = '聴く';
+        }
       };
       synth.speak(utter);
     };
@@ -773,9 +847,26 @@
       if ('webkitPreservesPitch' in currentAudio) currentAudio.webkitPreservesPitch = false;
       currentAudio.playbackRate = 0.8 + Math.random() * 0.4;
       
-      currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
-      currentAudio.load();
+      const tryPlay = async (retryCount) => {
+        try {
+          currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
+          currentAudio.load();
+          await currentAudio.play();
+          return true;
+        } catch (e) {
+          if (retryCount > 0) {
+            await new Promise(r => setTimeout(r, 1000));
+            return await tryPlay(retryCount - 1);
+          } else {
+            return false;
+          }
+        }
+      };
+
+      const isSuccess = await tryPlay(15);
       
+      if (!isSuccess) throw new Error("生成タイムアウト");
+
       currentAudio.onplay = () => {
         if (btnElement) {
           btnElement.classList.remove('loading');
@@ -785,7 +876,6 @@
       };
       
       currentAudio.onended = () => {
-        clearTimeout(globalWatchdog);
         if (btnElement) {
           btnElement.classList.remove('speaking');
           if (spanEl) spanEl.textContent = '聴く';
@@ -796,16 +886,13 @@
         fallbackToWebSpeech();
       };
 
-      await currentAudio.play();
-
     } catch (err) {
-      console.warn("API request failed. Falling back.", err);
+      console.warn("VOICEVOX failed, switching to fallback.", err);
       fallbackToWebSpeech();
     }
   }
 
   function stopSpeak() {
-    clearTimeout(globalWatchdog);
     if (currentAudio) {
       currentAudio.pause();
     }
@@ -819,6 +906,7 @@
     });
   }
 
+  // ボタンのイベントリスナー
   $('btn-speak').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
@@ -843,7 +931,8 @@
     if (text) shareToX(text, sit);
   });
 
-  const MIX_CATS = ['single_sounds','repeated_sounds','sound_phrases','fragments','manga_sfx','niibura','cecile_sounds'];
+  // === 状態 ===
+  const MIX_CATS = ['single_sounds','repeated_sounds','sound_phrases','fragments','manga_sfx','niibura','fake_french'];
 
   function buildMixQueue() {
     let pools = {};
@@ -931,8 +1020,7 @@
     $('phrase-text').textContent = phrase.text;
     $('phrase-hint').textContent = '声に出して読んでみよう';
 
-    // ⭐️ 偽フランス語の内部コード名のまま、表示ラベルは「セシール系」に変更
-    const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',cecile_sounds:'セシール系',mix:'ミックス'};
+    const labels = {single:'単発造語',repeat:'繰り返し',phrase:'造語フレーズ',fragment:'音の破片',manga_sfx:'漫画擬音',niibura:'ニーブラ系',fake_french:'セシール系',mix:'ミックス'};
     $('phrase-type').textContent = labels[phrase.type] || '';
 
     const speakBtn = $('btn-speak');
@@ -979,7 +1067,7 @@
     nextPhrase();
   };
 
-  // === 作りモード ===
+  // === 作るモード ===
   function initCreate() {
     state.create.templateIndex = -1;
     state.create.selections = {};
