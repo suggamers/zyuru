@@ -209,6 +209,7 @@
     
     .phrase-hint { font-size: var(--text-xs); color: var(--color-text-faint); letter-spacing: 0.06em; }
     
+    /* ★修正: シチュエーションを吹き出しバッジ化して強調 */
     .phrase-situation, .preview-situation {
       font-size: var(--text-sm);
       color: var(--color-surface); 
@@ -222,6 +223,7 @@
       box-shadow: 0 4px 10px rgba(128, 90, 213, 0.3);
       position: relative;
     }
+    /* 吹き出しの尻尾 */
     .phrase-situation::after, .preview-situation::after {
       content: '';
       position: absolute;
@@ -264,6 +266,7 @@
     
     .footer-actions { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; justify-content: flex-end;}
 
+    /* ★修正: ボタン幅を固定してガタつき（レイアウトシフト）を防止 */
     .btn-speak, .btn-share, .btn-favorite, .btn-copy {
       display: flex; align-items: center; justify-content: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
@@ -962,6 +965,7 @@
   let currentAudio = null; 
   const ZUNDAMON_STYLES = [3, 1, 7, 5, 22, 38, 75, 76];
   let globalWatchdog = null; 
+  let currentSpeakId = 0; // 追加：非同期競合を防ぐためのID
   
   const synth = window.speechSynthesis;
   let jpVoice = null;
@@ -990,6 +994,10 @@
 
   async function speakText(text, btnElement) {
     if (!text) return;
+    
+    currentSpeakId++; // リクエストIDを更新
+    const mySpeakId = currentSpeakId; // この処理用のIDを保持
+
     stopSpeak();
 
     if (synth) {
@@ -1007,12 +1015,14 @@
 
     clearTimeout(globalWatchdog);
     globalWatchdog = setTimeout(() => {
+      if (mySpeakId !== currentSpeakId) return;
       forceResetUI(btnElement, spanEl);
     }, 10000);
 
     const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
 
     const fallbackToWebSpeech = () => {
+      if (mySpeakId !== currentSpeakId) return; // 別の再生が始まっていたらキャンセル
       if (!synth) {
         clearTimeout(globalWatchdog);
         forceResetUI(btnElement, spanEl);
@@ -1030,6 +1040,7 @@
       utter.volume = 1.0;
 
       let fbCheck = setTimeout(() => {
+        if (mySpeakId !== currentSpeakId) return;
         if (btnElement && !btnElement.classList.contains('speaking')) {
            clearTimeout(globalWatchdog);
            forceResetUI(btnElement, spanEl);
@@ -1037,6 +1048,7 @@
       }, 1500);
 
       utter.onstart = () => {
+        if (mySpeakId !== currentSpeakId) return;
         clearTimeout(fbCheck);
         if (btnElement) {
           btnElement.classList.remove('loading');
@@ -1045,6 +1057,7 @@
         }
       };
       utter.onend = () => {
+        if (mySpeakId !== currentSpeakId) return;
         clearTimeout(globalWatchdog);
         if (btnElement) {
           btnElement.classList.remove('speaking');
@@ -1052,6 +1065,7 @@
         }
       };
       utter.onerror = () => {
+        if (mySpeakId !== currentSpeakId) return;
         clearTimeout(globalWatchdog);
         clearTimeout(fbCheck);
         forceResetUI(btnElement, spanEl);
@@ -1062,6 +1076,8 @@
     try {
       const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${currentSpeakerId}`;
       const res = await fetch(url);
+      if (mySpeakId !== currentSpeakId) return; // fetch中に別の再生が呼ばれたら中断
+      
       const data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
@@ -1072,6 +1088,7 @@
       currentAudio.playbackRate = 0.8 + Math.random() * 0.4;
       
       currentAudio.onplay = () => {
+        if (mySpeakId !== currentSpeakId) return;
         if (btnElement) {
           btnElement.classList.remove('loading');
           btnElement.classList.add('speaking');
@@ -1080,6 +1097,7 @@
       };
       
       currentAudio.onended = () => {
+        if (mySpeakId !== currentSpeakId) return;
         clearTimeout(globalWatchdog);
         if (btnElement) {
           btnElement.classList.remove('speaking');
@@ -1089,6 +1107,7 @@
       };
       
       currentAudio.onerror = () => {
+        if (mySpeakId !== currentSpeakId) return;
         fallbackToWebSpeech();
       };
 
@@ -1097,7 +1116,7 @@
       await currentAudio.play();
 
     } catch (err) {
-      if (err.name === 'AbortError') return; // 追加：再生キャンセル時はフォールバックを防止
+      if (mySpeakId !== currentSpeakId) return; // 別の再生が呼ばれたら中断
       console.warn("API failed. Falling back.", err);
       fallbackToWebSpeech();
     }
@@ -1106,7 +1125,7 @@
   function stopSpeak() {
     clearTimeout(globalWatchdog);
     if (currentAudio) {
-      currentAudio.onerror = null; // 追加：リセット処理中のエラーイベント発火を防止
+      currentAudio.onerror = null; // リセット処理中のエラーイベント発火を防止
       currentAudio.pause();
       currentAudio.removeAttribute('src'); // 完全にリセット
       currentAudio = null;
@@ -1296,7 +1315,7 @@
     r.currentSituation = phrase.situation || SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
     const sitEl = $('phrase-situation');
     sitEl.textContent = `状況：${r.currentSituation}`;
-    sitEl.style.display = 'inline-block';
+    sitEl.style.display = 'inline-block'; // バッジデザインなので inline-block
 
     r.awaitingReaction = false;
 
