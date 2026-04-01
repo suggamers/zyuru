@@ -209,7 +209,7 @@
     
     .phrase-hint { font-size: var(--text-xs); color: var(--color-text-faint); letter-spacing: 0.06em; margin-bottom: var(--space-2);}
     
-    /* === 修正: シチュエーションを吹き出しバッジ化して強調 === */
+    /* === シチュエーション（吹き出しバッジ） === */
     .phrase-situation, .preview-situation {
       font-size: var(--text-sm);
       color: var(--color-surface);
@@ -224,14 +224,8 @@
       position: relative;
     }
     .phrase-situation::after, .preview-situation::after {
-      content: '';
-      position: absolute;
-      bottom: -6px;
-      left: 50%;
-      transform: translateX(-50%);
-      border-width: 6px 6px 0;
-      border-style: solid;
-      border-color: var(--color-primary) transparent transparent transparent;
+      content: ''; position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%);
+      border-width: 6px 6px 0; border-style: solid; border-color: var(--color-primary) transparent transparent transparent;
     }
 
     .tap-instruction {
@@ -265,7 +259,7 @@
     
     .footer-actions { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; justify-content: flex-end;}
 
-    /* === 修正: アクションボタン群に固定幅を設定してガタつき防止 === */
+    /* === アクションボタン群 === */
     .btn-speak, .btn-share, .btn-favorite, .btn-copy {
       display: flex; align-items: center; justify-content: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
@@ -274,9 +268,8 @@
       box-shadow: var(--shadow-sm);
       transition: all var(--transition-ui); flex-shrink: 0;
       position: relative; z-index: 10;
-      min-width: 80px; /* 固定幅を追加 */
+      min-width: 80px; /* 固定幅でガタつき防止 */
     }
-    /* URLボタンは文字数が少ないので少し狭くてもOK */
     .btn-copy { min-width: 60px; }
 
     .btn-speak:hover, .btn-share:hover, .btn-copy:hover { 
@@ -962,7 +955,7 @@
   expandPhrases();
 
   // === 修正: 音声読み上げエンジンの安定化 ===
-  let currentAudio = null; // 毎回新しいインスタンスを作るように変更
+  let currentAudio = null; 
   const ZUNDAMON_STYLES = [3, 1, 7, 5, 22, 38, 75, 76];
   let globalWatchdog = null; 
   
@@ -993,14 +986,16 @@
 
   async function speakText(text, btnElement) {
     if (!text) return;
-    stopSpeak(); // 既存の音声を確実に止めて破棄する
+    stopSpeak();
 
-    // スマホの自動再生ブロック回避
-    if (synth) {
-      let dummy = new SpeechSynthesisUtterance('');
-      dummy.volume = 0;
-      synth.speak(dummy);
+    // ⭐️ スマホの自動再生ブロック回避: 同期的に空の音声を再生してロック解除
+    if (!currentAudio) {
+      currentAudio = new Audio();
     }
+    currentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
+    currentAudio.volume = 0;
+    currentAudio.play().catch(e => console.warn('Unlock failed:', e));
+    currentAudio.volume = 1; 
 
     let spanEl = null;
     if (btnElement) {
@@ -1009,7 +1004,6 @@
       if (spanEl) spanEl.textContent = '生成中...';
     }
 
-    // フリーズ防止のウォッチドッグタイマー（少し短縮）
     clearTimeout(globalWatchdog);
     globalWatchdog = setTimeout(() => {
       forceResetUI(btnElement, spanEl);
@@ -1067,37 +1061,28 @@
     try {
       const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${currentSpeakerId}`;
       const res = await fetch(url);
-      const data = await res.json();
+      let data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
 
-      // ⭐️ 毎回新しい Audio インスタンスを生成してバグを回避
+      // ⭐️ API側で音声生成が終わるまで待機する（ポーリング処理の復活）
+      let attempts = 0;
+      while (!data.isAudioReady && attempts < 10) {
+        await new Promise(r => setTimeout(r, 1000));
+        const statusRes = await fetch(data.audioStatusUrl);
+        data = await statusRes.json();
+        if (data.isAudioError) throw new Error("音声生成失敗");
+        attempts++;
+      }
+
+      if (!data.isAudioReady) throw new Error("生成タイムアウト");
+
       currentAudio = new Audio();
       currentAudio.preservesPitch = false;
       if ('webkitPreservesPitch' in currentAudio) currentAudio.webkitPreservesPitch = false;
       currentAudio.playbackRate = 0.8 + Math.random() * 0.4;
       
-      const tryPlay = async (retryCount) => {
-        try {
-          currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
-          currentAudio.load();
-          await currentAudio.play();
-          return true;
-        } catch (e) {
-          if (retryCount > 0) {
-            await new Promise(r => setTimeout(r, 1000));
-            return await tryPlay(retryCount - 1);
-          } else {
-            return false;
-          }
-        }
-      };
-
-      // リトライ回数を減らして無限ループを防ぐ
-      const isSuccess = await tryPlay(5);
-      
-      if (!isSuccess) throw new Error("生成タイムアウト");
-
+      // ⭐️ src設定前にイベントリスナーを登録
       currentAudio.onplay = () => {
         if (btnElement) {
           btnElement.classList.remove('loading');
@@ -1112,12 +1097,16 @@
           btnElement.classList.remove('speaking');
           if (spanEl) spanEl.textContent = '聴く';
         }
-        currentAudio = null; // 使い終わったら破棄
+        currentAudio = null; 
       };
       
       currentAudio.onerror = () => {
         fallbackToWebSpeech();
       };
+
+      currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
+      currentAudio.load();
+      await currentAudio.play();
 
     } catch (err) {
       console.warn("VOICEVOX failed, switching to fallback.", err);
@@ -1130,7 +1119,7 @@
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.src = "";
-      currentAudio = null; // 確実に破棄
+      currentAudio = null; 
     }
     if (synth) {
       synth.cancel();
@@ -1183,7 +1172,6 @@
     updateFavUI(this, text, c.currentSituation);
   });
 
-  // URLコピーボタンのイベントリスナー追加
   $('btn-copy-read').addEventListener('click', function(e) {
     e.stopPropagation();
     copyShareUrl(this.dataset.phrase, this.dataset.sit, this);
@@ -1468,125 +1456,4 @@
     const copyBtn = $('btn-copy-create');
     const sitEl = $('preview-situation');
     
-    if (Object.keys(c.selections).length === 0) {
-      el.textContent = '—— 上から選んで完成させよう ——';
-      el.classList.add('placeholder');
-      card.classList.remove('ready');
-      speakBtn.style.display = 'none';
-      shareBtn.style.display = 'none';
-      favBtn.style.display = 'none';
-      if(copyBtn) copyBtn.style.display = 'none';
-      sitEl.style.display = 'none';
-      $('create-reaction-area').style.display = 'none';
-    } else {
-      el.textContent = text;
-      el.classList.remove('placeholder');
-      if (allFilled) { 
-        card.classList.add('ready'); 
-        
-        sitEl.textContent = `${c.currentSituation}`;
-        sitEl.style.display = 'block';
-        
-        $('create-reaction-area').style.display = 'flex';
-        speakBtn.style.display = 'flex';
-        shareBtn.style.display = 'flex';
-        favBtn.style.display = 'flex';
-        if(copyBtn) copyBtn.style.display = 'flex';
-        
-        speakBtn.dataset.phrase = text;
-        shareBtn.dataset.phrase = text;
-        shareBtn.dataset.sit = c.currentSituation;
-        if(copyBtn) {
-          copyBtn.dataset.phrase = text;
-          copyBtn.dataset.sit = c.currentSituation;
-        }
-        
-        updateFavUI(favBtn, text, c.currentSituation);
-        
-      } else { 
-        card.classList.remove('ready'); 
-        sitEl.style.display = 'none';
-        $('create-reaction-area').style.display = 'none';
-        speakBtn.style.display = 'none';
-        shareBtn.style.display = 'none';
-        favBtn.style.display = 'none';
-        if(copyBtn) copyBtn.style.display = 'none';
-      }
-    }
-  }
-
-  $('btn-new-template').onclick = () => { $('create-reaction-area').style.display='none'; nextTemplate(); };
-  $('btn-shuffle-slots').onclick = () => {
-    const c = state.create;
-    c.current.slots.forEach((slotType, idx) => {
-      const sugs = SLOT_SUGGESTIONS[slotType] || [];
-      if (sugs.length) c.selections[idx] = sugs[Math.floor(Math.random()*sugs.length)];
-    });
-    document.querySelectorAll('.slot-chip').forEach(chip => {
-      chip.classList.toggle('selected', c.selections[parseInt(chip.dataset.slot)] === chip.dataset.word);
-    });
-    updatePreview();
-    triggerZowa(1);
-  };
-
-  document.querySelectorAll('.create-react').forEach(btn => {
-    btn.onclick = () => {
-      const val = parseInt(btn.dataset.val);
-      state.create.score += val * 2;
-      $('create-score').textContent = state.create.score;
-      $('create-score').classList.remove('score-pop');
-      void $('create-score').offsetWidth;
-      $('create-score').classList.add('score-pop');
-      triggerZowa(val);
-      $('create-reaction-area').style.display = 'none';
-      $('btn-speak-create').style.display = 'none';
-      $('btn-share-create').style.display = 'none';
-      $('btn-fav-create').style.display = 'none';
-      $('btn-copy-create').style.display = 'none';
-      $('preview-situation').style.display = 'none';
-      setTimeout(() => nextTemplate(), 1200);
-    };
-  });
-
-  function triggerZowa(intensity) {
-    const ripple = $('zowa-ripple');
-    ripple.classList.remove('animate-1','animate-2','animate-3');
-    void ripple.offsetWidth;
-    ripple.classList.add('animate-'+intensity);
-    if (intensity >= 3) {
-      document.body.classList.remove('shake');
-      void document.body.offsetWidth;
-      document.body.classList.add('shake');
-      setTimeout(() => document.body.classList.remove('shake'), 700);
-    }
-    setTimeout(() => ripple.classList.remove('animate-1','animate-2','animate-3'), 1500);
-  }
-
-  // === 初期ロード時のURL共有パラメータ処理 ===
-  window.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const sharedText = urlParams.get('text');
-    const sharedSit = urlParams.get('sit');
-
-    if (sharedText) {
-      showScreen('read');
-      initRead(true); 
-      
-      state.read.queue.push({
-        text: sharedText,
-        type: 'shared',
-        intensity: 3,
-        situation: sharedSit || ''
-      });
-      
-      nextPhrase();
-      
-      if (window.history.replaceState) {
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    }
-  });
-
-  </script>
-</body>
-</html>
+    if (Object.keys(c.selections).
