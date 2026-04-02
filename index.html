@@ -209,7 +209,6 @@
     
     .phrase-hint { font-size: var(--text-xs); color: var(--color-text-faint); letter-spacing: 0.06em; }
     
-    /* ★修正: シチュエーションを吹き出しバッジ化して強調 */
     .phrase-situation, .preview-situation {
       font-size: var(--text-sm);
       color: var(--color-surface); 
@@ -223,7 +222,6 @@
       box-shadow: 0 4px 10px rgba(128, 90, 213, 0.3);
       position: relative;
     }
-    /* 吹き出しの尻尾 */
     .phrase-situation::after, .preview-situation::after {
       content: '';
       position: absolute;
@@ -266,7 +264,6 @@
     
     .footer-actions { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; justify-content: flex-end;}
 
-    /* ★修正: ボタン幅を固定してガタつき（レイアウトシフト）を防止 */
     .btn-speak, .btn-share, .btn-favorite, .btn-copy {
       display: flex; align-items: center; justify-content: center; gap: var(--space-1);
       padding: var(--space-2) var(--space-3); border-radius: var(--radius-full);
@@ -283,8 +280,8 @@
       color: var(--color-primary); border-color: var(--color-primary); 
       background: var(--color-primary-dim); transform: translateY(-1px);
     }
-    .btn-speak.loading { opacity: 0.6; pointer-events: none; animation: speakPulse 1.5s ease-in-out infinite; }
-    .btn-speak.speaking { color: var(--color-surface); border-color: var(--color-primary); background: var(--color-primary); animation: speakPulse 800ms ease-in-out infinite; }
+    .btn-speak.loading { opacity: 0.6; cursor: wait; animation: speakPulse 1.5s ease-in-out infinite; }
+    .btn-speak.speaking { color: var(--color-surface); border-color: var(--color-primary); background: var(--color-primary); animation: speakPulse 800ms ease-in-out infinite; pointer-events: none;}
 
     .btn-favorite:hover { color: var(--color-favorite); border-color: var(--color-favorite); background: var(--color-favorite-dim); transform: translateY(-1px); }
     .btn-favorite.active { color: var(--color-favorite); border-color: var(--color-favorite); background: var(--color-favorite-dim); }
@@ -963,8 +960,25 @@
   // === 音声読み上げエンジンの安定化 ===
   let currentAudio = null; 
   const ZUNDAMON_STYLES = [3, 1, 7, 5, 22, 38, 75, 76];
-  let currentSpeakId = 0; 
-  let currentAbortController = null; // APIリクエストを即座にキャンセルするためのコントローラー
+  let currentAbortController = null; 
+  let isGenerating = false;
+  
+  // キャッシュ用 (phrase: blobUrl)
+  const audioCache = {};
+  const situationSpokenMap = {};
+
+  const synth = window.speechSynthesis;
+  let jpVoice = null;
+  function loadVoices() {
+    if(!synth) return;
+    const voices = synth.getVoices();
+    // なるべく自然な日本語の声を優先して取得
+    jpVoice = voices.find(v => v.lang === 'ja-JP' || v.name.includes('Google 日本語') || v.name.includes('Kyoko') || v.name.includes('Megumi')) || null;
+  }
+  if (synth && synth.onvoiceschanged !== undefined) {
+    synth.onvoiceschanged = loadVoices;
+  }
+  loadVoices();
 
   function forceResetUI(btnElement, spanEl) {
     if (btnElement) {
@@ -973,25 +987,29 @@
         spanEl.textContent = '聴く';
       }
     }
+    isGenerating = false;
   }
 
   function stopSpeak() {
-    currentSpeakId++; // IDを更新して進行中の非同期処理を無効化
-    
-    // 進行中のAPIリクエストがあれば即座にキャンセル
+    // 進行中のAPI通信があればキャンセル
     if (currentAbortController) {
       currentAbortController.abort();
       currentAbortController = null;
     }
     
-    // 再生中の音声があれば即座に停止して破棄
+    // 再生中のオーディオがあれば完全停止
     if (currentAudio) {
       currentAudio.pause();
       currentAudio.removeAttribute('src');
       currentAudio = null;
     }
     
-    // UIを初期状態に戻す
+    // シチュエーション読み上げが裏で鳴っていれば止める
+    if (synth) synth.cancel();
+    
+    isGenerating = false;
+
+    // 全ての再生ボタンのUI状態をリセット
     document.querySelectorAll('.btn-speak').forEach(btn => {
       btn.classList.remove('speaking', 'loading');
       const span = btn.querySelector('span');
@@ -999,75 +1017,109 @@
     });
   }
 
-  async function speakText(text, btnElement) {
+  function playAudioObj(audioUrl, btnElement, spanEl) {
+    if (currentAudio) {
+      currentAudio.pause();
+      currentAudio.removeAttribute('src');
+    }
+
+    currentAudio = new Audio(audioUrl);
+    currentAudio.preservesPitch = false;
+    if ('webkitPreservesPitch' in currentAudio) currentAudio.webkitPreservesPitch = false;
+    currentAudio.playbackRate = 0.8 + Math.random() * 0.4;
+    
+    currentAudio.onplay = () => {
+      if (btnElement) {
+        btnElement.classList.remove('loading');
+        btnElement.classList.add('speaking');
+        if (spanEl) spanEl.textContent = '再生中';
+      }
+    };
+    
+    currentAudio.onended = () => {
+      forceResetUI(btnElement, spanEl);
+      currentAudio = null; 
+    };
+    
+    currentAudio.onerror = () => {
+      forceResetUI(btnElement, spanEl);
+    };
+
+    currentAudio.play().catch(e => {
+      console.warn("再生がブロックされました:", e);
+      forceResetUI(btnElement, spanEl);
+    });
+  }
+
+  async function speakText(text, situationText, btnElement) {
     if (!text) return;
     
-    // 新しい音声を再生する前に、完全にリセットする
-    stopSpeak();
+    // 現在生成中であれば、連打による重複リクエストを無効化
+    if (isGenerating) return;
 
-    currentSpeakId++;
-    const mySpeakId = currentSpeakId;
-    currentAbortController = new AbortController(); // 新しいキャンセルコントローラーを作成
+    // 前の再生を安全に停止
+    stopSpeak();
 
     let spanEl = null;
     if (btnElement) {
-      btnElement.classList.add('loading');
       spanEl = btnElement.querySelector('span');
+    }
+
+    // すでに取得済みの音声（キャッシュ）があれば、即座にそれを再生して終了
+    if (audioCache[text]) {
+      playAudioObj(audioCache[text], btnElement, spanEl);
+      return;
+    }
+
+    isGenerating = true;
+    currentAbortController = new AbortController();
+
+    if (btnElement) {
+      btnElement.classList.add('loading');
       if (spanEl) spanEl.textContent = '生成中...';
+    }
+
+    // 遅延対策：Web Speech APIでシチュエーションを一度だけ読み上げる
+    let fallbackTimer = null;
+    if (situationText && !situationSpokenMap[text] && synth) {
+      fallbackTimer = setTimeout(() => {
+        situationSpokenMap[text] = true;
+        const utter = new SpeechSynthesisUtterance("状況。" + situationText);
+        utter.lang = 'ja-JP';
+        if (jpVoice) utter.voice = jpVoice;
+        utter.rate = 1.0; 
+        synth.speak(utter);
+      }, 500); // 0.5秒経ってもAPI結果が返らなければ再生開始
     }
 
     const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
 
     try {
+      // ずんだもんAPIにリクエスト
       const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${currentSpeakerId}`;
-      
-      // signalを渡すことで、途中でabort()されたらfetchを中断させる
       const res = await fetch(url, { signal: currentAbortController.signal });
-      
-      if (mySpeakId !== currentSpeakId) return; // fetch中に別の再生が呼ばれたら中断
-      
       const data = await res.json();
       
       if (!data.success) throw new Error("APIエラー");
-      if (mySpeakId !== currentSpeakId) return;
 
-      currentAudio = new Audio();
-      currentAudio.preservesPitch = false;
-      if ('webkitPreservesPitch' in currentAudio) currentAudio.webkitPreservesPitch = false;
-      // ピッチと速度のランダム化は維持
-      currentAudio.playbackRate = 0.8 + Math.random() * 0.4;
+      // 生成された音声をBlob（実体データ）としてダウンロードし、ローカルURLを作成（キャッシュ化）
+      const audioRes = await fetch(data.mp3DownloadUrl, { signal: currentAbortController.signal });
+      const audioBlob = await audioRes.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
       
-      currentAudio.onplay = () => {
-        if (mySpeakId !== currentSpeakId) return;
-        if (btnElement) {
-          btnElement.classList.remove('loading');
-          btnElement.classList.add('speaking');
-          if (spanEl) spanEl.textContent = '再生中';
-        }
-      };
+      audioCache[text] = audioUrl; // メモリに保存
       
-      currentAudio.onended = () => {
-        if (mySpeakId !== currentSpeakId) return;
-        if (btnElement) forceResetUI(btnElement, spanEl);
-        currentAudio = null; 
-      };
-      
-      currentAudio.onerror = () => {
-        if (mySpeakId !== currentSpeakId) return;
-        if (btnElement) forceResetUI(btnElement, spanEl);
-      };
+      // 無事に取得できたらFallbackタイマーを停止し、もしシチュエーションを喋っていれば即座に止める
+      clearTimeout(fallbackTimer);
+      if (synth) synth.cancel();
 
-      currentAudio.src = data.mp3DownloadUrl + "?t=" + new Date().getTime();
-      currentAudio.load();
-      await currentAudio.play();
+      isGenerating = false;
+      playAudioObj(audioUrl, btnElement, spanEl);
 
     } catch (err) {
-      // AbortError（ユーザーが新しくボタンを押してキャンセルされた場合）は無視する
-      if (err.name === 'AbortError') return;
+      if (err.name === 'AbortError') return; // ユーザーが意図的に中断した場合は無視
       
-      if (mySpeakId !== currentSpeakId) return;
-      console.warn("API failed.", err);
-      // APIエラー時もUIを元に戻すだけ（代替音声は流さない）
+      console.warn("APIの通信に失敗しました:", err);
       forceResetUI(btnElement, spanEl);
     }
   }
@@ -1075,12 +1127,15 @@
   $('btn-speak').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
-    if (text) speakText(text, this);
+    const sit = this.dataset.sit;
+    if (text) speakText(text, sit, this);
   });
+  
   $('btn-speak-create').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
-    if (text) speakText(text, this);
+    const sit = this.dataset.sit;
+    if (text) speakText(text, sit, this);
   });
   
   $('btn-share-read').addEventListener('click', function(e) {
@@ -1089,6 +1144,7 @@
     const sit = this.dataset.sit;
     if (text) shareToX(text, sit);
   });
+  
   $('btn-share-create').addEventListener('click', function(e) {
     e.stopPropagation();
     const text = this.dataset.phrase;
@@ -1247,7 +1303,7 @@
     r.currentSituation = phrase.situation || SITUATIONS[Math.floor(Math.random() * SITUATIONS.length)];
     const sitEl = $('phrase-situation');
     sitEl.textContent = `状況：${r.currentSituation}`;
-    sitEl.style.display = 'inline-block'; // バッジデザインなので inline-block
+    sitEl.style.display = 'inline-block'; 
 
     r.awaitingReaction = false;
 
@@ -1274,7 +1330,11 @@
     
     speakBtn.dataset.phrase = phrase.text;
     shareBtn.dataset.phrase = phrase.text;
+    
+    // シチュエーションをボタンデータに紐付け
+    speakBtn.dataset.sit = r.currentSituation;
     shareBtn.dataset.sit = r.currentSituation;
+    
     if(copyBtn) {
       copyBtn.dataset.phrase = phrase.text;
       copyBtn.dataset.sit = r.currentSituation;
@@ -1423,7 +1483,11 @@
         
         speakBtn.dataset.phrase = text;
         shareBtn.dataset.phrase = text;
+        
+        // シチュエーションをボタンデータに紐付け
+        speakBtn.dataset.sit = c.currentSituation;
         shareBtn.dataset.sit = c.currentSituation;
+        
         if(copyBtn) {
           copyBtn.dataset.phrase = text;
           copyBtn.dataset.sit = c.currentSituation;
