@@ -301,6 +301,11 @@
     }
     .btn-reaction:hover { border-color: var(--color-primary); background: var(--color-primary-dim); transform: translateY(-3px); box-shadow: var(--shadow-md); }
     .btn-reaction:active { transform: scale(0.95); box-shadow: none; }
+    
+    /* ★追加：評価後のボタンのスタイル */
+    .btn-reaction:disabled { cursor: not-allowed; opacity: 0.5; transform: none !important; box-shadow: var(--shadow-sm) !important; }
+    .btn-reaction.selected { opacity: 1 !important; border-color: var(--color-primary) !important; background: var(--color-primary-dim) !important; transform: translateY(-2px) !important; box-shadow: var(--shadow-md) !important; }
+
     .reaction-emoji { font-size: 1.75rem; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
     .reaction-text { font-size: var(--text-xs); font-weight: 600; color: var(--color-text-muted); }
 
@@ -1004,18 +1009,17 @@
       document.querySelectorAll('.btn-speak').forEach(btn => forceResetUI(btn));
     }
 
-    // 1. 状況読み上げを行うPromise（完了まで待機）
     function speakSituation(situationText) {
       return new Promise(resolve => {
         if (!synth || !situationText) {
-          resolve(); // 音声読み上げ未対応環境やテキストがない場合は即完了
+          resolve(); 
           return;
         }
         try {
           const utter = new SpeechSynthesisUtterance("状況。" + situationText);
           utter.lang = 'ja-JP';
           if (jpVoice) utter.voice = jpVoice;
-          utter.rate = 1.1; // 待たせすぎないように少し早め
+          utter.rate = 1.1; 
           
           let isResolved = false;
           const finish = () => {
@@ -1029,7 +1033,6 @@
           utter.onerror = finish;
           synth.speak(utter);
           
-          // セーフティ: 万が一イベントが発火しなかった時は最大6秒で次へ進める
           setTimeout(finish, 6000);
         } catch (e) {
           resolve();
@@ -1037,7 +1040,6 @@
       });
     }
 
-    // 2. ずんだもんを生成してURLを取得するPromise（CORSエラー回避のため直接URLを使用）
     async function fetchZundamon(text, signal) {
       const currentSpeakerId = ZUNDAMON_STYLES[Math.floor(Math.random() * ZUNDAMON_STYLES.length)];
       const url = `https://api.tts.quest/v3/voicevox/synthesis?text=${encodeURIComponent(text)}&speaker=${currentSpeakerId}`;
@@ -1049,12 +1051,11 @@
       return data.mp3DownloadUrl;
     }
 
-    // 3. 取得済みのURLを再生する関数
     function playPreparedAudio(audioUrl, btnElement) {
       currentAudio.src = audioUrl;
       currentAudio.preservesPitch = false;
       if ('webkitPreservesPitch' in currentAudio) currentAudio.webkitPreservesPitch = false;
-      currentAudio.playbackRate = 0.8 + Math.random() * 0.4; // 独特なスピード調整
+      currentAudio.playbackRate = 0.8 + Math.random() * 0.4; 
       
       const spanEl = btnElement ? btnElement.querySelector('span') : null;
 
@@ -1079,23 +1080,19 @@
       });
     }
 
-    // ★ メインの再生処理（並列処理とキャッシュ制御）
     async function speakText(text, situationText, btnElement) {
       if (!text || isGenerating) return;
 
-      // 事前にAudioインスタンスを作ってダミーの無音を再生し、スマホの自動再生ブロックを突破する
       if (!currentAudio) currentAudio = new Audio();
       currentAudio.pause();
       currentAudio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
       currentAudio.play().catch(()=>{});
 
-      // ▼ すでに生成完了したキャッシュがあれば、状況読み上げをスキップして即再生
       if (audioCache[text]) {
         playPreparedAudio(audioCache[text], btnElement);
         return;
       }
 
-      // ▼ 初回生成プロセス（UIを待機状態にする）
       isGenerating = true;
       if (btnElement) {
         btnElement.classList.add('loading');
@@ -1106,20 +1103,17 @@
       currentAbortController = new AbortController();
 
       try {
-        // Promise.allで「APIでの生成」と「ブラウザ標準の状況読み上げ」の両方が完了するのを待つ！
         const [audioUrl] = await Promise.all([
           fetchZundamon(text, currentAbortController.signal),
           speakSituation(situationText)
         ]);
 
-        // 両方終わったらキャッシュに保存して、ずんだもんを再生
         audioCache[text] = audioUrl;
         isGenerating = false;
 
         playPreparedAudio(audioUrl, btnElement);
 
       } catch (err) {
-        // ボタン連打等によるキャンセルの場合は何もしない
         if (err.name === 'AbortError') {
           isGenerating = false;
           return; 
@@ -1285,7 +1279,14 @@
       const pcard = $('phrase-card');
       if (pcard) pcard.classList.remove('showing','entering','zowa-flash');
       
+      // ボタンの状態をリセット
+      document.querySelectorAll('#reaction-area .btn-reaction').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('selected');
+      });
+
       r.awaitingReaction = false;
+      r.current = null; // 現在のフレーズをリセット
     }
 
     document.querySelectorAll('.cat-tab').forEach(tab => {
@@ -1320,7 +1321,11 @@
     if (pcardClick) {
       pcardClick.onclick = (e) => {
         if (e.target.closest('.btn-speak') || e.target.closest('.btn-share') || e.target.closest('.btn-favorite') || e.target.closest('.btn-copy')) return;
-        if (!state.read.awaitingReaction) nextPhrase();
+        
+        // ★修正: 初回スタート時のみカードタップで進める。それ以降は「次の音列」ボタンを強制。
+        if (!state.read.current) {
+          nextPhrase();
+        }
       };
     }
 
@@ -1396,8 +1401,15 @@
       updateFavUI(favBtn, phrase.text, r.currentSituation);
       stopSpeak();
 
+      // UIをリセットして再表示
+      const rarea = $('reaction-area');
+      if (rarea) rarea.style.display = 'none';
+      document.querySelectorAll('#reaction-area .btn-reaction').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('selected');
+      });
+
       setTimeout(() => {
-        const rarea = $('reaction-area');
         if (rarea) rarea.style.display = 'flex';
         r.awaitingReaction = true;
       }, 600);
@@ -1427,8 +1439,10 @@
         
         triggerZowa(val);
         
-        const rarea = $('reaction-area');
-        if (rarea) rarea.style.display = 'none';
+        // ★修正: 評価エリアを消さずに、ボタンを全て無効化し、押したボタンをハイライト
+        document.querySelectorAll('#reaction-area .btn-reaction').forEach(b => b.disabled = true);
+        btn.classList.add('selected');
+
         r.awaitingReaction = false;
         
         const pcard = $('phrase-card');
@@ -1441,8 +1455,6 @@
 
     const bnr = $('btn-next-read');
     if (bnr) bnr.onclick = () => { 
-      const rarea = $('reaction-area');
-      if(rarea) rarea.style.display='none'; 
       nextPhrase(); 
     };
 
@@ -1468,6 +1480,13 @@
       
       const ttext = $('template-text');
       if (ttext) ttext.textContent = c.current.template;
+      
+      // ボタンの状態をリセット
+      document.querySelectorAll('.create-react').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('selected');
+      });
+
       stopSpeak();
       renderSlots();
       updatePreview();
@@ -1585,8 +1604,6 @@
 
     const bnt = $('btn-new-template');
     if (bnt) bnt.onclick = () => { 
-      const crarea = $('create-reaction-area');
-      if (crarea) crarea.style.display='none'; 
       nextTemplate(); 
     };
     
@@ -1617,7 +1634,12 @@
         }
         triggerZowa(val);
         
-        ['create-reaction-area', 'btn-speak-create', 'btn-share-create', 'btn-fav-create', 'btn-copy-create', 'preview-situation'].forEach(id => {
+        // ★修正: 評価エリアを消さずに、ボタンを全て無効化し、押したボタンをハイライト
+        document.querySelectorAll('.create-react').forEach(b => b.disabled = true);
+        btn.classList.add('selected');
+        
+        // その他の操作ボタンは見えなくする
+        ['btn-speak-create', 'btn-share-create', 'btn-fav-create', 'btn-copy-create', 'preview-situation'].forEach(id => {
           const el = $(id);
           if (el) el.style.display = 'none';
         });
