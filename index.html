@@ -315,12 +315,12 @@
     .btn-next:hover { background: var(--color-primary-hover); transform: translateY(-2px); box-shadow: 0 6px 15px rgba(128, 90, 213, 0.4); }
     .btn-next:active { transform: scale(0.98); box-shadow: 0 2px 5px rgba(128, 90, 213, 0.3); }
     
-    .btn-skip, .btn-secondary {
+    .btn-secondary {
       padding: var(--space-3) var(--space-4); color: var(--color-text-muted); background: var(--color-surface);
       border: 1px solid var(--color-border); border-radius: var(--radius-lg); font-size: var(--text-sm); font-weight: 600;
       box-shadow: var(--shadow-sm); transition: all var(--transition-ui);
     }
-    .btn-skip:hover, .btn-secondary:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); }
+    .btn-secondary:hover { color: var(--color-primary); border-color: var(--color-primary); background: var(--color-primary-dim); }
 
     /* === ストリークバー === */
     .streak-bar {
@@ -512,7 +512,6 @@
     </div>
     <div class="next-area">
       <button class="btn-next" id="btn-next-read">次の音列</button>
-      <button class="btn-skip" id="btn-skip-read">スキップ</button>
     </div>
     <div class="streak-bar">
       <span class="streak-label">連続ぞわ</span>
@@ -1445,16 +1444,6 @@
       const rarea = $('reaction-area');
       if(rarea) rarea.style.display='none'; 
       nextPhrase(); 
-    };
-    
-    const bsr = $('btn-skip-read');
-    if (bsr) bsr.onclick = () => {
-      const rarea = $('reaction-area');
-      if(rarea) rarea.style.display='none';
-      state.read.streak=0; 
-      const scnt = $('streak-count');
-      if (scnt) scnt.textContent=0;
-      nextPhrase();
     };
 
     // === 作るモード ===
